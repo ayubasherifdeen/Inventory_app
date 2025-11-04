@@ -1,0 +1,27 @@
+
+<!Doctype html>
+<html lang="en">
+    <head>
+        <meta charset="=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Home</title>
+    </head>
+
+    <body>
+        <p>
+            <a href="{% url 'keep_inventory:index' %}">Dashboard</a>
+            <a href="{% url 'keep_inventory:sell' %}">Sell</a>
+            <a href="{% url 'users:logout' %}">Log out</a>
+
+            {% if user.is_authenticated %}
+                Hello, {{ user.username }}
+            {% else %}
+                <a href="{% url 'users:login' %}">Log in</a>
+            {% endif %}
+        </p>
+
+{% block content %}{% endblock content %}
+
+    </body>
+
+</html>
