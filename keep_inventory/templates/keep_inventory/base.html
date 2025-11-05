@@ -11,11 +11,18 @@
         <p>
             <a href="{% url 'keep_inventory:index' %}">Dashboard</a>
             <a href="{% url 'keep_inventory:sell' %}">Sell</a>
-            <a href="{% url 'users:logout' %}">Log out</a>
+            <form action="{% url 'users:logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit"style="background:none; border:none; text-decoration:underline; cursor:pointer;">
+                         Log out
+                    </button>
+            </form>
+
 
             {% if user.is_authenticated %}
                 Hello, {{ user.username }}
             {% else %}
+                <a href="{% url 'users:register' %}">Register</a> 
                 <a href="{% url 'users:login' %}">Log in</a>
             {% endif %}
         </p>

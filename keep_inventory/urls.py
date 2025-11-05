@@ -8,6 +8,5 @@ urlpatterns = [
     #Home page
     path('', views.index, name='index'),
     path('products/', views.search_products, name='sell'),
-    #Registration page
-    path('register/', views.regsiter, name='register'),
+   
 ]
