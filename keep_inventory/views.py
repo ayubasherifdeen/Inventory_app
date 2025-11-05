@@ -21,3 +21,8 @@ def search_products(request):
     }
     return render(request, 'keep_inventory/sell.html', context)
 
+def add_products(request):
+    """Add product to be sold"""
+    add =request.POST.get()
+
+
