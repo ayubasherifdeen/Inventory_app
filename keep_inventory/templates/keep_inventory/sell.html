@@ -5,6 +5,7 @@
     <h2>Search Products</h2>
 
     <form method="get" action="{% url 'keep_inventory:sell' %}">
+        {% csrf_token %}
         <input type="text" name="q" value="{{ query }}" placeholder="Search products..." autofocus>
         <button type="submit">Search</button>
     </form>
@@ -17,6 +18,7 @@
             <th>Product</th>
             <th>Unit Price</th>
             <th>Quantity in Stock</th>
+            <th>Purchasing Quantity</th>
         </tr>
         {% for product in results %}
         <tr>
@@ -24,8 +26,11 @@
             <td>{{ product.unit_selling_price }}</td>
             <td>{{ product.total_stock }}</td>
             <td>
-                <form method="post" action="{% url 'keep_inventory:sell' %}">
-                    <button type="submit" name="add">Add</button>
+                <form method="post" action="{% url 'keep_inventory:add_to_cart' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ product.product_id }}">
+                    <input type="number" min="1" max="{{ product.total_stock }}" name="quantity" required>
+                    <button type="submit">Add</button>
                 </form>
             </td>
 
@@ -38,29 +43,35 @@
     {% endif %}
 </div>
 
-<div class="add-section">
+<div class="confirmation-section">
+    <h2>Confirmation Table</h2>
+    {% if cart %}
     <table>
         <tr>
             <th>Product</th>
             <th>Unit Price</th>
-            <th>Quantity in Stock</th>
+            <th>Purchasing Quantity</th>
+            <th>Amount</th>
+            <th>Action</th>
         </tr>
+        {% for item in cart %}
         <tr>
-            <td>{{ product.product_name }}</td>
-            <td>{{ product.unit_selling_price }}</td>
-            <td>{{ product.quantity_in_stock }}</td>
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.unit_selling_price }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.amount }}</td>
             <td>
-                <form>
-                    <input type="number" min="1" max="product.total_stock" name="add">
-                    <button type="submit">Confirm</button>
+                <form >
+                    {% csrf_token %}
+                    <button type="submit">❌</button>
                 </form>
             </td>
         </tr>
+        {% endfor %}
     </table>
-</div>
-
-<div class="confirmation-section">
-
+    {% else %}
+    <p>No items added yet.</p>
+    {% endif %}
 </div>
 
 {% endblock content %}

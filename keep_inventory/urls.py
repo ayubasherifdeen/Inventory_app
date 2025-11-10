@@ -7,6 +7,10 @@ app_name = 'keep_inventory'
 urlpatterns = [
     #Home page
     path('', views.index, name='index'),
-    path('products/', views.search_products, name='sell'),
+    #Sell page
+    path('sell/', views.search_products, name='sell'),
+    path('add_to_cart/', views.add_to_cart, name='add_to_cart'),
    
+    
+    
 ]
