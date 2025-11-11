@@ -9,7 +9,11 @@ urlpatterns = [
     path('', views.index, name='index'),
     #Sell page
     path('sell/', views.search_products, name='sell'),
+    #add to cart
     path('add_to_cart/', views.add_to_cart, name='add_to_cart'),
+    #remove from cart
+    path('remove_from_cart/<str:product_id>/', views.remove_from_cart, name='remove_from_cart'),
+
    
     
     

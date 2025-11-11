@@ -60,6 +60,21 @@ def add_to_cart(request):
     return redirect('keep_inventory:sell')
 
 
+def remove_from_cart(request, product_id):
+    """Remove a selected item from cart"""
+    cart =request.session.get('cart', [])
+     # Filter out the product you want to remove
+    updated_cart = [item for item in cart if item['product_id'] != product_id]
+
+    # Update session
+    request.session['cart'] = updated_cart
+
+    # Redirect back to the sell page
+    return redirect('keep_inventory:sell')
+
+
+
+
 
 
 

@@ -61,9 +61,9 @@
             <td>{{ item.quantity }}</td>
             <td>{{ item.amount }}</td>
             <td>
-                <form >
+                <form method="POST" action="{% url 'keep_inventory:remove_from_cart' item.product_id %}">
                     {% csrf_token %}
-                    <button type="submit">❌</button>
+                    <button type="submit" name="remove" value="remove">❌</button>
                 </form>
             </td>
         </tr>
