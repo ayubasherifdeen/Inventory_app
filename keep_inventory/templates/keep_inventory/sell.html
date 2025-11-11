@@ -69,6 +69,9 @@
         </tr>
         {% endfor %}
     </table>
+    {% if cart %}
+        <p><strong>Total amount:</strong> {{ total_amount }}</p>
+    {% endif %}
     {% else %}
     <p>No items added yet.</p>
     {% endif %}

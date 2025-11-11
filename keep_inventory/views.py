@@ -14,6 +14,8 @@ def search_products(request):
     query = request.GET.get('q', '')
     results = []
     cart = request.session.get('cart', [])
+    total_amount = request.session.get('total_amount', 0)
+
 
     if query:
         results = Product.objects.filter(product_name__icontains=query)
@@ -22,6 +24,7 @@ def search_products(request):
         'query': query,
         'results': results,
         'cart': cart,
+        'total_amount': total_amount
     }
     return render(request, 'keep_inventory/sell.html', context)
 
@@ -33,7 +36,7 @@ def add_to_cart(request):
         product_id = request.POST.get('product_id')
         quantity =int(request.POST.get('quantity', 1))
         cart = request.session.get('cart', [])
-
+        
         if not product_id:
             return redirect('keep_inventory:sell')
 
@@ -53,8 +56,14 @@ def add_to_cart(request):
             'quantity': quantity,
             'amount': float(product.unit_selling_price) * quantity,
                 })
+            
+            #calculate total amount for all items
+            total_amount = sum(item['amount'] for item in cart)
+
         #update cart session
         request.session['cart'] = cart
+        request.session['total_amount'] = total_amount
+
         return redirect('keep_inventory:sell')
     
     return redirect('keep_inventory:sell')
@@ -66,8 +75,14 @@ def remove_from_cart(request, product_id):
      # Filter out the product you want to remove
     updated_cart = [item for item in cart if item['product_id'] != product_id]
 
+    #recalculate cart total
+    total_amount = sum(item['amount'] for item in updated_cart)
+
     # Update session
     request.session['cart'] = updated_cart
+    request.session['total_amount'] = total_amount
+
+    
 
     # Redirect back to the sell page
     return redirect('keep_inventory:sell')
