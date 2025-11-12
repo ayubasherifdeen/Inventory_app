@@ -44,8 +44,10 @@ class SalesDetail(models.Model):
     sales_detail_id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sales_id = models.ForeignKey(Sale, on_delete=models.CASCADE)
     product_id = models.ForeignKey(Product, on_delete=models.CASCADE)   
+    product_name=models.CharField(null=True, blank=True)
     unit_price =models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None) 
     quantity = models.IntegerField(null=True, default=None)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
     
 
 

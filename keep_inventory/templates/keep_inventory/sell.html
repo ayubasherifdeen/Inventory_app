@@ -72,6 +72,10 @@
     {% if cart %}
         <p><strong>Total amount:</strong> {{ total_amount }}</p>
     {% endif %}
+        <form method="post" action="{% url 'keep_inventory:confirm_sale'%}">
+            {% csrf_token %}
+            <button type="submit" name="confirm_sale" value="confirm_sale">Confirm Sale</button>
+        </form>
     {% else %}
     <p>No items added yet.</p>
     {% endif %}
