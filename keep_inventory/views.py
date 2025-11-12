@@ -10,7 +10,7 @@ def index(request):
     """The home page of inventory"""
     return render(request, 'keep_inventory/index.html')
 
-@login
+@login_required
 def search_products(request):
     query = request.GET.get('q', '')
     results = []
