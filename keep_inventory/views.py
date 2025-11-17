@@ -5,11 +5,55 @@ from . models import Product, Sale, SalesDetail
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
+from django.contrib import messages
+from django.db.models import Count
+from datetime import timedelta
+from datetime import datetime
 
 # Create your views here.
 def index(request):
     """The home page of inventory"""
-    return render(request, 'keep_inventory/index.html')
+    sales_count = request.session.pop('sales_count', None)
+
+    return render(request, 'keep_inventory/index.html', {
+        'sales_count': sales_count
+    })
+
+
+@login_required
+def search_transaction_per_date(request):
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+
+    # Validate input
+    if not start_date_str or not end_date_str:
+        request.session['sales_count'] = None
+        return redirect('keep_inventory:index')
+
+    try:
+        # Convert strings to date objects
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+
+        # query and count number of sales
+        sales_count = Sale.objects.filter(
+            sales_date__range=(start_date, end_date),
+            owner=request.user
+        ).count()
+
+        # Store in session so index page can access it
+        request.session['sales_count'] = sales_count
+
+    except ValueError:
+        # Invalid date format
+        request.session['sales_count'] = None
+
+    return redirect('keep_inventory:index')
+
+
+
+
+    
 
 @login_required
 def search_products(request):
@@ -141,6 +185,8 @@ def confirm_sale(request):
             # Clear session
             request.session['cart'] = []
             request.session['total_amount'] = 0
+
+            messages.success(request, f"Cart cleared, sale succesful")
 
     except Exception:
         # If something breaks, rollback happens automatically

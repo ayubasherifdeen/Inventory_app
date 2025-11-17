@@ -1,18 +1,36 @@
 {% extends "keep_inventory/base.html" %}
 
 {% block content %}
-    <p>Inventory</p>
-    <p>Helps you keep track of available goods, as well as sales</p>
-    <p>Sales Overview</p>
+
+<h2>Sales Overview</h2>
+<div>
+    <form method="get" action="{% url  'keep_inventory:search_transaction_per_date' %}">
+        <label for="start_date">
+            Start Date:
+            <input type="date" id="start_date" name="start_date" required>
+        </label>
+        <label for="end_date">
+            End Date:
+            <input type="date" id="end_date" name="end_date" required>
+        </label>
+        <button type="submit" name = "date">Search</button>
+    </form>
+</div>
+<div>
     <div>
-        <div>
-            NO. OF TRANSACTIONS 
-            
-        </div>
-        <div>TOTAL SALES</div>
-        
+        <h3>NO. OF TRANSACTIONS</h3>
+        {% if sales_count != None %}
+            <p>{{ sales_count }}</p>
+        {% endif %}
 
     </div>
-    
+    <div>
+        <h3>TOTAL SALES</h3>
+        <p></p>
+    </div>
+
+
+</div>
+
 
 {% endblock content %}

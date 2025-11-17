@@ -14,9 +14,6 @@ urlpatterns = [
     #remove from cart
     path('remove_from_cart/<str:product_id>/', views.remove_from_cart, name='remove_from_cart'),
     #checkout the cart
-    path('confirm_sale', views.confirm_sale, name='confirm_sale')
-
-   
-    
-    
+    path('confirm_sale', views.confirm_sale, name='confirm_sale'),
+    path('search_transaction_per_date/', views.search_transaction_per_date, name='search_transaction_per_date'),
 ]
