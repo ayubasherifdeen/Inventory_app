@@ -6,7 +6,7 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from django.contrib import messages
-from django.db.models import Count
+from django.db.models import Count, Sum
 from datetime import timedelta
 from datetime import datetime
 
@@ -14,9 +14,13 @@ from datetime import datetime
 def index(request):
     """The home page of inventory"""
     sales_count = request.session.pop('sales_count', None)
+    total_sales = request.session.pop('total_sales', None)
+    total_quantity = request.session.pop('total_quantity', None)
 
     return render(request, 'keep_inventory/index.html', {
-        'sales_count': sales_count
+        'sales_count': sales_count,
+        'total_sales':total_sales,
+        'total_quantity':total_quantity,
     })
 
 
@@ -32,24 +36,34 @@ def search_transaction_per_date(request):
 
     try:
         # Convert strings to date objects
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
-        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
 
-        # query and count number of sales
+        # query and count number of sales and total sales
         sales_count = Sale.objects.filter(
             sales_date__range=(start_date, end_date),
             owner=request.user
         ).count()
 
-        # Store in session so index page can access it
-        request.session['sales_count'] = sales_count
+        total_sales =Sale.objects.filter(
+            sales_date__range=(start_date, end_date),
+            owner=request.user
+        ).aggregate(total=Sum('total_amount'))['total']
 
+        total_quantity = SalesDetail.objects.filter(
+            created_at__range = (start_date, end_date),
+            
+        ).aggregate(tots = Sum('total_quantity'))['tots']
+
+        # Store in session so index page can access it
+        request.session['sales_count'] = sales_count or 0
+        request.session['total_sales'] = str(total_sales) or 0
+        request.session['total_quantity'] = total_quantity or 0
     except ValueError:
         # Invalid date format
         request.session['sales_count'] = None
 
     return redirect('keep_inventory:index')
-
 
 
 

@@ -15,12 +15,14 @@ class ProductAdmin(admin.ModelAdmin):
 class SaleAdmin(admin.ModelAdmin):
     list_display=['sales_id','owner', 'sales_date', 'total_amount',]
     readonly_fields=['sales_id', 'owner', 'sales_date', 'total_amount']
-    list_filter = ['sales_date']
+    list_filter = ['sales_date', 'owner']
+ 
 
 @admin.register(SalesDetail)
 class SalesDetailAdmin(admin.ModelAdmin):
     list_display = ['sales_id', 'total_quantity', 'total_amount', 'created_at']
     readonly_fields = ("formatted_items",)
+    
     
     fieldsets = (
         ("Items Purchased", {

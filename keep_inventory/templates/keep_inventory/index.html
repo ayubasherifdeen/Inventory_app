@@ -26,7 +26,15 @@
     </div>
     <div>
         <h3>TOTAL SALES</h3>
-        <p></p>
+        {% if total_sales != None %}
+            <p>{{ total_sales }}</p>
+        {% endif %}
+    </div>
+     <div>
+        <h3>TOTAL QUANTITY</h3>
+        {% if total_quantity != None %}
+            <p>{{ total_quantity }}</p>
+        {% endif %}
     </div>
 
 
