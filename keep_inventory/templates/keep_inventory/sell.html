@@ -76,6 +76,14 @@
             {% csrf_token %}
             <button type="submit" name="confirm_sale" value="confirm_sale">Confirm Sale</button>
         </form>
+
+        {% if messages%}
+            <ul>
+                {% for message in messages%}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {%endif %}
     {% else %}
     <p>No items added yet.</p>
     {% endif %}

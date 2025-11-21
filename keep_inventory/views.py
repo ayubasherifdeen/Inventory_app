@@ -4,13 +4,102 @@ from django.contrib.auth.forms import UserCreationForm
 from . models import Product, Sale, SalesDetail
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
+from django.db.models import F
+from django.contrib import messages
+from django.db.models import Count, Sum
+from datetime import timedelta
+from datetime import datetime
 
 # Create your views here.
 def index(request):
     """The home page of inventory"""
-    return render(request, 'keep_inventory/index.html')
+    sales_count = request.session.pop('sales_count', None)
+    total_sales = request.session.pop('total_sales', None)
+    total_quantity = request.session.pop('total_quantity', None)
 
-@login
+    return render(request, 'keep_inventory/index.html', {
+        'sales_count': sales_count,
+        'total_sales':total_sales,
+        'total_quantity':total_quantity,
+    })
+
+
+@login_required
+def search_sales_per_date(request):
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+
+    # Validate input
+    if not start_date_str or not end_date_str:
+        request.session['sales_count'] = None
+        return redirect('keep_inventory:index')
+
+    try:
+        # Convert strings to date objects
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+
+        # query and count number of sales
+        sales_count = Sale.objects.filter(
+            sales_date__range=(start_date, end_date),
+            owner=request.user
+        ).count()
+
+        #query and find total amount of sales
+        total_sales =Sale.objects.filter(
+            sales_date__range=(start_date, end_date),
+            owner=request.user
+        ).aggregate(total=Sum('total_amount'))['total']
+
+      
+
+        # Store in session so index page can access it
+        request.session['sales_count'] = sales_count or 0
+        request.session['total_sales'] = str(total_sales) or 0
+  
+    except ValueError:
+        # Invalid date format
+        request.session['sales_count'] = None
+
+    return redirect('keep_inventory:index')
+
+
+@login_required
+def search_transaction_per_date(request):
+    start_date_str = request.GET.get('start_date_tr')
+    end_date_str = request.GET.get('end_date_tr')
+
+    # Validate input
+    transactions = None
+    if  start_date_str and end_date_str:
+       
+        try:
+            # Convert strings to date objects
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+
+            # query and count number of sales
+            transactions = Sale.objects.filter(
+                sales_date__range=(start_date, end_date),
+                owner=request.user
+            ).order_by('-sales_date')
+  
+        except ValueError:
+           transactions = None
+
+    
+
+    return render(request, "keep_inventory/transactions.html", context = {
+        'start_date':start_date_str,
+        'end_date':end_date_str,
+        'transactions':transactions
+    })
+
+    
+
+    
+
+@login_required
 def search_products(request):
     query = request.GET.get('q', '')
     results = []
@@ -63,7 +152,7 @@ def add_to_cart(request):
 
         #update cart session
         request.session['cart'] = cart
-        request.session['total_amount'] = total_amount
+        request.session['total_amount'] = float(total_amount)
 
         return redirect('keep_inventory:sell')
     
@@ -90,40 +179,66 @@ def remove_from_cart(request, product_id):
 @transaction.atomic
 def confirm_sale(request):
     """Confirm sale and checkout cart"""
-    if request.method == "POST":
-        cart = request.session.get('cart', [])
-        total_amount = request.session.get('total_amount', 0)
+    if request.method != "POST":
+        return redirect("keep_inventory:sell")
 
-        if not cart:
-            redirect("keep_inventory:sell")
+    cart = request.session.get('cart', [])
+    total_amount = request.session.get('total_amount', 0)
 
-    #Create sale record
-    sale = Sale.objects.create(total_amount=total_amount)
+    if not cart:
+        return redirect("keep_inventory:sell")
 
-    #Create sale detail for each item
-    for item in cart:
-        product = Product.objects.get(product_id=item['product_id'])
-        
-        SalesDetail.objects.create(
-            sales_id=sale,
-            product_id=product,
-            product_name=product.product_name,
-            quantity=item['quantity'],
-            unit_price=item['unit_selling_price'],
-            amount=item['amount'],
+    try:
+        with transaction.atomic():
+            # Create Sale record
+            sale = Sale.objects.create(
+                total_amount=total_amount,
+                owner=request.user
             )
-        
-        #make update stock quantity
-        product.total_stock = product.total_stock - item['quantity']
-        product.save()
 
-        request.session['cart'] = []
-        request.session['total_amount'] = 0
+            # Prepare items list and update stock
+            items = []
+            total_quantity = 0
 
-        #Redirect back to the sell page
-        return redirect('keep_inventory:sell')
+            for item in cart:
+                product = Product.objects.get(product_id=item['product_id'])
 
-    return redirect('keep_inventory:sell')
+                items.append({
+                    "product_id": str(product.product_id),
+                    "product_name": product.product_name,
+                    "quantity": item['quantity'],
+                    "unit_price": float(item['unit_selling_price']),
+                    "amount": float(item['amount']),
+                })
+
+                total_quantity += item['quantity']
+
+                # Reduce stock
+                Product.objects.filter(product_id=product.product_id).update(
+                    total_stock=F('total_stock') - item['quantity']
+                )
+
+            # Create SalesDetail record
+            SalesDetail.objects.create(
+                sales_id=sale,
+                items=items,
+                total_quantity=total_quantity,
+                total_amount=total_amount
+            )
+
+            # Clear session
+            request.session['cart'] = []
+            request.session['total_amount'] = 0
+
+            messages.success(request, f"Cart cleared, sale succesful")
+
+    except Exception:
+        # If something breaks, rollback happens automatically
+        return redirect("keep_inventory:sell")
+
+    return redirect("keep_inventory:sell")
+
+
 
 
 

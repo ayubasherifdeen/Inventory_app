@@ -1,35 +1,45 @@
 from django.db import models
 from django.db.models import F
 import uuid
+from django.contrib.auth.models import User
+from django.db.models import JSONField
+from django.utils.safestring import mark_safe
+
+
 
 class Product(models.Model):
     """A product sold by the shop"""
-    product_id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product_name = models.CharField(max_length=200)
     unit_cost_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
     unit_selling_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
-    unit_profit = models.GeneratedField(
-        expression = F('unit_selling_price') - F('unit_cost_price'),
-        output_field = models.DecimalField(max_digits=10, decimal_places=2, null=True),
-        db_persist=True
-    )
-    add_stock = models.IntegerField(null=True, default=0)
-    quantity_in_stock = models.IntegerField(null=True, default=0)
-    total_stock = models.GeneratedField(
-        expression = F('add_stock')+F('quantity_in_stock'),
-        output_field = models.IntegerField(null=True),
-        db_persist =True
-    )
-    total_profit = models.GeneratedField(
-        expression = F('unit_profit') * F('total_stock'),
-        output_field = models.DecimalField(max_digits=10, decimal_places=2, null=True),
-        db_persist =True
-    )
 
-    
+    # Now represents current stock
+    total_stock = models.IntegerField(null=True, default=0)  
+    # Temporary field for new stock additions
+    add_stock = models.IntegerField(null=True, default=0)      
+
+    def save(self, *args, **kwargs):
+        # Update current stock before saving
+        if self.add_stock:
+            self.total_stock = (self.total_stock or 0) + self.add_stock
+            self.add_stock = 0  # Reset after applying
+        super().save(*args, **kwargs)
+
+    @property
+    def unit_profit(self):
+        if self.unit_cost_price is not None and self.unit_selling_price is not None:
+            return self.unit_selling_price - self.unit_cost_price
+        return None
+
+    @property
+    def total_profit(self):
+        profit = self.unit_profit
+        if profit is not None and self.total_stock is not None:
+            return profit * self.total_stock
+        return None
 
     def __str__(self):
-        """Return a string representation of the model"""
         return self.product_name
 
 
@@ -38,17 +48,50 @@ class Sale(models.Model):
     sales_id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sales_date = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class SalesDetail(models.Model):
     """Details of a sales made"""
-    sales_detail_id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    sales_id = models.ForeignKey(Sale, on_delete=models.CASCADE)
-    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)   
-    product_name=models.CharField(null=True, blank=True)
-    unit_price =models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None) 
-    quantity = models.IntegerField(null=True, default=None)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
-    
+    sales_id = models.ForeignKey('Sale', on_delete=models.CASCADE)
+    items = models.JSONField()  # Stores list of products sold in one transaction
+    total_quantity = models.IntegerField()
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def formatted_items(self):
+        """Return items as a neat HTML table for admin display."""
+        if not self.items:
+            return "-"
+
+        html = """
+        <table style="border-collapse: collapse; width: 100%;">
+            <tr style="background: #f2f2f2;">
+                <th style="border: 1px solid #ccc; padding: 6px;">Product</th>
+                <th style="border: 1px solid #ccc; padding: 6px;">Qty</th>
+                <th style="border: 1px solid #ccc; padding: 6px;">Price</th>
+                <th style="border: 1px solid #ccc; padding: 6px;">Subtotal</th>
+            </tr>
+        """
+
+        for item in self.items:
+            html += f"""
+            <tr>
+                <td style="border: 1px solid #ccc; padding: 6px;">{item['product_name']}</td>
+                <td style="border: 1px solid #ccc; padding: 6px; text-align: center;">{item['quantity']}</td>
+                <td style="border: 1px solid #ccc; padding: 6px;">{item['unit_price']}</td>
+                <td style="border: 1px solid #ccc; padding: 6px;">{item['amount']}</td>
+            </tr>
+            """
+
+        html += "</table>"
+        return mark_safe(html)
+
+    formatted_items.short_description = "Items Purchased"
+
+    def __str__(self):
+        return f"Sale Details #{self.id}"
+
+
 
 
 
