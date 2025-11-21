@@ -4,7 +4,7 @@
 
 <h2>Sales Overview</h2>
 <div>
-    <form method="get" action="{% url  'keep_inventory:search_transaction_per_date' %}">
+    <form method="get" action="{% url  'keep_inventory:search_sales_per_date' %}">
         <label for="start_date">
             Start Date:
             <input type="date" id="start_date" name="start_date" required>
@@ -27,7 +27,7 @@
     <div>
         <h3>TOTAL SALES</h3>
         {% if total_sales != None %}
-            <p>{{ total_sales }}</p>
+            <p>GH₵{{ total_sales }}</p>
         {% endif %}
     </div>
      <div>

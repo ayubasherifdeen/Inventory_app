@@ -1,0 +1,37 @@
+{% extends "keep_inventory/base.html" %}
+
+{% block content %}
+<div>
+    <form method="get" action="{% url  'keep_inventory:search_transaction_per_date' %}">
+        <label for="start_date_tr">
+            Start Date:
+            <input type="date" id="start_date_tr" name="start_date_tr" required>
+        </label>
+        <label for="end_date_tr">
+            End Date:
+            <input type="date" id="end_date_tr" name="end_date_tr" required>
+        </label>
+        <button type="submit" name = "date">Search</button>
+    </form>
+</div>
+
+<div>
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Total Amount</th>
+        <th>Details</th>
+    </tr>
+    {% if transactions != None %}
+        <tr>
+            {% for sale in transactions %}
+            <td>{{ sale.sales_date }}</td>
+            <td>{{ sale.total_amount }}</td>
+            <td><a>View</a></td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+</table>
+</div>
+
+{% endblock content %}

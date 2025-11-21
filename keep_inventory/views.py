@@ -25,7 +25,7 @@ def index(request):
 
 
 @login_required
-def search_transaction_per_date(request):
+def search_sales_per_date(request):
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
 
@@ -39,26 +39,24 @@ def search_transaction_per_date(request):
         start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
         end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
 
-        # query and count number of sales and total sales
+        # query and count number of sales
         sales_count = Sale.objects.filter(
             sales_date__range=(start_date, end_date),
             owner=request.user
         ).count()
 
+        #query and find total amount of sales
         total_sales =Sale.objects.filter(
             sales_date__range=(start_date, end_date),
             owner=request.user
         ).aggregate(total=Sum('total_amount'))['total']
 
-        total_quantity = SalesDetail.objects.filter(
-            created_at__range = (start_date, end_date),
-            
-        ).aggregate(tots = Sum('total_quantity'))['tots']
+      
 
         # Store in session so index page can access it
         request.session['sales_count'] = sales_count or 0
         request.session['total_sales'] = str(total_sales) or 0
-        request.session['total_quantity'] = total_quantity or 0
+  
     except ValueError:
         # Invalid date format
         request.session['sales_count'] = None
@@ -66,6 +64,38 @@ def search_transaction_per_date(request):
     return redirect('keep_inventory:index')
 
 
+@login_required
+def search_transaction_per_date(request):
+    start_date_str = request.GET.get('start_date_tr')
+    end_date_str = request.GET.get('end_date_tr')
+
+    # Validate input
+    transactions = None
+    if  start_date_str and end_date_str:
+       
+        try:
+            # Convert strings to date objects
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+
+            # query and count number of sales
+            transactions = Sale.objects.filter(
+                sales_date__range=(start_date, end_date),
+                owner=request.user
+            ).order_by('-sales_date')
+  
+        except ValueError:
+           transactions = None
+
+    
+
+    return render(request, "keep_inventory/transactions.html", context = {
+        'start_date':start_date_str,
+        'end_date':end_date_str,
+        'transactions':transactions
+    })
+
+    
 
     
 
