@@ -2,6 +2,8 @@
 
 {% block content %}
 
+<p>{{ start_date }} - {{ end_date }}</p>
+
 <h2>Sales Overview</h2>
 <div>
     <form method="get" action="{% url  'keep_inventory:search_sales_per_date' %}">

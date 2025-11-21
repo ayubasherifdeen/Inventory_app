@@ -7,8 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from django.contrib import messages
 from django.db.models import Count, Sum
-from datetime import timedelta
-from datetime import datetime
+from datetime import timedelta, date, datetime
+
 
 # Create your views here.
 def index(request):
@@ -21,6 +21,7 @@ def index(request):
         'sales_count': sales_count,
         'total_sales':total_sales,
         'total_quantity':total_quantity,
+        'auto_load':True
     })
 
 
@@ -31,18 +32,17 @@ def search_sales_per_date(request):
 
     # Validate input
     if not start_date_str or not end_date_str:
-        request.session['sales_count'] = None
-        return redirect('keep_inventory:index')
+         # Get today's date
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
 
-    try:
-        # Convert strings to date objects
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-        end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+        start_date = today
+        end_date = tomorrow
 
         # query and count number of sales
         sales_count = Sale.objects.filter(
-            sales_date__range=(start_date, end_date),
-            owner=request.user
+                sales_date__range=(start_date, end_date),
+                owner=request.user
         ).count()
 
         #query and find total amount of sales
@@ -51,15 +51,33 @@ def search_sales_per_date(request):
             owner=request.user
         ).aggregate(total=Sum('total_amount'))['total']
 
+    if start_date_str and end_date_str:
+        try:
+            # Convert strings to date objects
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+
+            # query and count number of sales
+            sales_count = Sale.objects.filter(
+                sales_date__range=(start_date, end_date),
+                owner=request.user
+            ).count()
+
+            #query and find total amount of sales
+            total_sales =Sale.objects.filter(
+                sales_date__range=(start_date, end_date),
+                owner=request.user
+            ).aggregate(total=Sum('total_amount'))['total']
+
       
 
-        # Store in session so index page can access it
-        request.session['sales_count'] = sales_count or 0
-        request.session['total_sales'] = str(total_sales) or 0
+            # Store in session so index page can access it
+            request.session['sales_count'] = sales_count or 0
+            request.session['total_sales'] = str(total_sales) or 0
   
-    except ValueError:
-        # Invalid date format
-        request.session['sales_count'] = None
+        except ValueError:
+            # Invalid date format
+            request.session['sales_count'] = None
 
     return redirect('keep_inventory:index')
 
@@ -71,8 +89,24 @@ def search_transaction_per_date(request):
 
     # Validate input
     transactions = None
-    if  start_date_str and end_date_str:
+    if not start_date_str and not end_date_str:
+         # Get today's date
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+
+         # Convert strings to date objects
+        start_date = today
+        end_date = tomorrow
+
+        # query and count number of sales
+        transactions = Sale.objects.filter(
+            sales_date__range=(start_date, end_date),
+            owner=request.user
+        ).order_by('-sales_date')
+
+    if start_date_str and end_date_str:
        
+        #If date is provided
         try:
             # Convert strings to date objects
             start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
@@ -85,14 +119,16 @@ def search_transaction_per_date(request):
             ).order_by('-sales_date')
   
         except ValueError:
-           transactions = None
+            transactions = None
 
     
 
     return render(request, "keep_inventory/transactions.html", context = {
-        'start_date':start_date_str,
-        'end_date':end_date_str,
-        'transactions':transactions
+
+        'start_date':start_date,
+        'end_date':end_date,
+        'transactions':transactions,
+        'auto_load':True
     })
 
     
