@@ -34,13 +34,15 @@
     </div>
 
 </div>
-<div><p>
-        {% for product in products %}
-            {% if product <= 3 %}
-                only {{ product.total_stock }} of {{ product.product_name }} remains
-            {% endif %}
-        {% endfor %}
+<div>
+    <h3>Alerts</h3>
+    {% if low_stock %}
+        {% for stock in low_stock %}
+    <p>           
+        only <b>{{ stock.total_stock }}</b> of <b>{{ stock.product_name }}</b> remains    
     </p>
+        {% endfor %}
+    {% endif %}
 </div>
 
 
