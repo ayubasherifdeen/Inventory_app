@@ -12,74 +12,75 @@ from datetime import timedelta, date, datetime
 
 # Create your views here.
 def index(request):
-    """The home page of inventory"""
-    sales_count = request.session.pop('sales_count', None)
-    total_sales = request.session.pop('total_sales', None)
-    total_quantity = request.session.pop('total_quantity', None)
+    """Home page – automatically loads today's sales."""
+    
+    # Default: today's date range
+    today = date.today()
+    tomorrow = today + timedelta(days=1)
+
+    # Auto-query for today's sales
+    sales_count = Sale.objects.filter(
+        sales_date__range=(today, tomorrow),
+        owner=request.user
+    ).count()
+
+    total_sales = Sale.objects.filter(
+        sales_date__range=(today, tomorrow),
+        owner=request.user
+    ).aggregate(total=Sum('total_amount'))['total']
+
+    # Check if search view passed custom dates via session
+    start_date = request.session.pop('start_date', today)
+    end_date = request.session.pop('end_date', tomorrow)
+    sales_count = request.session.pop('sales_count', sales_count)
+    total_sales = request.session.pop('total_sales', total_sales)
 
     return render(request, 'keep_inventory/index.html', {
         'sales_count': sales_count,
-        'total_sales':total_sales,
-        'total_quantity':total_quantity,
-        'auto_load':True
+        'total_sales': total_sales,
+        'start_date': start_date,
+        'end_date': end_date,
+        'auto_load': True,
     })
-
 
 @login_required
 def search_sales_per_date(request):
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
 
-    # Validate input
     if not start_date_str or not end_date_str:
-         # Get today's date
-        today = date.today()
-        tomorrow = today + timedelta(days=1)
+        # Missing dates → redirect with no session overrides
+        return redirect('keep_inventory:index')
 
-        start_date = today
-        end_date = tomorrow
+    try:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
 
-        # query and count number of sales
+        # Adjust end date for range filtering
+        end_date_next = end_date + timedelta(days=1)
+
+        # Query
         sales_count = Sale.objects.filter(
-                sales_date__range=(start_date, end_date),
-                owner=request.user
+            sales_date__range=(start_date, end_date_next),
+            owner=request.user
         ).count()
 
-        #query and find total amount of sales
-        total_sales =Sale.objects.filter(
-            sales_date__range=(start_date, end_date),
+        total_sales = Sale.objects.filter(
+            sales_date__range=(start_date, end_date_next),
             owner=request.user
         ).aggregate(total=Sum('total_amount'))['total']
 
-    if start_date_str and end_date_str:
-        try:
-            # Convert strings to date objects
-            start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-            end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+        # Store results in session
+        request.session['start_date'] = str(start_date)
+        request.session['end_date'] = str(end_date)
+        request.session['sales_count'] = sales_count
+        request.session['total_sales'] = str(total_sales)
 
-            # query and count number of sales
-            sales_count = Sale.objects.filter(
-                sales_date__range=(start_date, end_date),
-                owner=request.user
-            ).count()
-
-            #query and find total amount of sales
-            total_sales =Sale.objects.filter(
-                sales_date__range=(start_date, end_date),
-                owner=request.user
-            ).aggregate(total=Sum('total_amount'))['total']
-
-      
-
-            # Store in session so index page can access it
-            request.session['sales_count'] = sales_count or 0
-            request.session['total_sales'] = str(total_sales) or 0
-  
-        except ValueError:
-            # Invalid date format
-            request.session['sales_count'] = None
+    except ValueError:
+        pass
 
     return redirect('keep_inventory:index')
+
 
 
 @login_required
@@ -273,6 +274,11 @@ def confirm_sale(request):
         return redirect("keep_inventory:sell")
 
     return redirect("keep_inventory:sell")
+
+
+def shortage(request):
+    """Check for shortage"""
+    quantity = Product.objects.count(total_stock)
 
 
 
