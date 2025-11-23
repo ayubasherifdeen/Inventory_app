@@ -2,6 +2,8 @@
 
 {% block content %}
 
+<p>{{ start_date }} - {{ end_date }}</p>
+
 <h2>Sales Overview</h2>
 <div>
     <form method="get" action="{% url  'keep_inventory:search_sales_per_date' %}">
@@ -30,14 +32,15 @@
             <p>GH₵{{ total_sales }}</p>
         {% endif %}
     </div>
-     <div>
-        <h3>TOTAL QUANTITY</h3>
-        {% if total_quantity != None %}
-            <p>{{ total_quantity }}</p>
-        {% endif %}
-    </div>
 
-
+</div>
+<div><p>
+        {% for product in products %}
+            {% if product <= 3 %}
+                only {{ product.total_stock }} of {{ product.product_name }} remains
+            {% endif %}
+        {% endfor %}
+    </p>
 </div>
 
 
