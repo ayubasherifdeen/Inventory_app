@@ -11,6 +11,7 @@ from datetime import timedelta, date, datetime
 
 
 # Create your views here.
+@login_required
 def index(request):
     """Home page – automatically loads today's sales."""
     
@@ -40,7 +41,7 @@ def index(request):
     start_date = request.session.pop('start_date', today)
     end_date = request.session.pop('end_date', tomorrow)
     sales_count = request.session.pop('sales_count', sales_count)
-    total_sales = request.session.pop('total_sales', total_sales)
+    total_sales = request.session.pop('total_sales', 0)
 
     return render(request, 'keep_inventory/index.html', {
         'sales_count': sales_count,

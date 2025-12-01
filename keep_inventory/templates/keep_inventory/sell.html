@@ -6,14 +6,14 @@
 
     <form method="get" action="{% url 'keep_inventory:sell' %}">
         {% csrf_token %}
-        <input type="text" name="q" value="{{ query }}" placeholder="Search products..." autofocus>
-        <button type="submit">Search</button>
+        <input type="text" name="q" value="{{ query }}" placeholder="🔍 Search products..." autofocus>
+        <button type="submit" class="btn btn-info">Search</button>
     </form>
 
     {% if query %}
     <h3>Results for "{{ query }}":</h3>
     {% if results %}
-    <table>
+    <table class="table-hover table-bordered table">
         <tr>
             <th>Product</th>
             <th>Unit Price</th>
@@ -30,7 +30,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="product_id" value="{{ product.product_id }}">
                     <input type="number" min="1" max="{{ product.total_stock }}" name="quantity" required>
-                    <button type="submit">Add</button>
+                    <button type="submit">➕Add</button>
                 </form>
             </td>
 
@@ -46,7 +46,7 @@
 <div class="confirmation-section">
     <h2>Confirmation Table</h2>
     {% if cart %}
-    <table>
+    <table class="table-hover table-bordered table">
         <tr>
             <th>Product</th>
             <th>Unit Price</th>
@@ -74,7 +74,7 @@
     {% endif %}
         <form method="post" action="{% url 'keep_inventory:confirm_sale'%}">
             {% csrf_token %}
-            <button type="submit" name="confirm_sale" value="confirm_sale">Confirm Sale</button>
+            <button type="submit" name="confirm_sale" value="confirm_sale" class="btn btn-info">Confirm Sale</button>
         </form>
 
         {% if messages%}

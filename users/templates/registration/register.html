@@ -1,9 +1,14 @@
 {% extends "keep_inventory/base.html" %}
+{% load bootstrap4 %}
+
+{% block page_header %}
+    <h2>Register a new account</h2>
+{% endblock page_header %}
 
 {% block content %}
-    <form method="post" action="{% url 'users:register' %}">
+    <form method="post" action="{% url 'users:register' %}" class="form">
         {% csrf_token %}
-        {{ form.as_p }}
+        {% bootstrap_form form %}
         <button name="submit" class="btn btn-lg btn-primary">Register</button>
         <input type="hidden" name="next" value="{% url 'keep_inventory:index' %}"/>
 

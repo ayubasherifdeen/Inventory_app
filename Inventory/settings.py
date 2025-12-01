@@ -35,6 +35,9 @@ INSTALLED_APPS = [
     'keep_inventory',
     'users',
 
+    #third part
+    'bootstrap4',
+
     #Default django apps
     'django.contrib.admin',
     'django.contrib.auth',
@@ -128,3 +131,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #my settings
 LOGIN_URL = 'users:login'
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "keep_inventory" /"static"
+    ]   
