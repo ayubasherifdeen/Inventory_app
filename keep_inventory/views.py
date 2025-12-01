@@ -11,6 +11,7 @@ from datetime import timedelta, date, datetime
 
 
 # Create your views here.
+@login_required
 def index(request):
     """Home page – automatically loads today's sales."""
     
@@ -29,17 +30,25 @@ def index(request):
         owner=request.user
     ).aggregate(total=Sum('total_amount'))['total']
 
+    #check for shortage
+    threshold = 4
+    low_stock = Product.objects.filter(
+        total_stock__lt = threshold
+    ). values('product_name', 'total_stock')
+
+
     # Check if search view passed custom dates via session
     start_date = request.session.pop('start_date', today)
     end_date = request.session.pop('end_date', tomorrow)
     sales_count = request.session.pop('sales_count', sales_count)
-    total_sales = request.session.pop('total_sales', total_sales)
+    total_sales = request.session.pop('total_sales', 0)
 
     return render(request, 'keep_inventory/index.html', {
         'sales_count': sales_count,
         'total_sales': total_sales,
         'start_date': start_date,
         'end_date': end_date,
+        'low_stock':low_stock,
         'auto_load': True,
     })
 
@@ -53,8 +62,8 @@ def search_sales_per_date(request):
         return redirect('keep_inventory:index')
 
     try:
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-        end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
 
         # Adjust end date for range filtering
         end_date_next = end_date + timedelta(days=1)
@@ -74,7 +83,7 @@ def search_sales_per_date(request):
         request.session['start_date'] = str(start_date)
         request.session['end_date'] = str(end_date)
         request.session['sales_count'] = sales_count
-        request.session['total_sales'] = str(total_sales)
+        request.session['total_sales'] = float(total_sales)
 
     except ValueError:
         pass
@@ -275,10 +284,6 @@ def confirm_sale(request):
 
     return redirect("keep_inventory:sell")
 
-
-def shortage(request):
-    """Check for shortage"""
-    quantity = Product.objects.count(total_stock)
 
 
 

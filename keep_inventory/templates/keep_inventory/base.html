@@ -1,35 +1,73 @@
-
+{% load bootstrap4 %}
+ {% load static %}
 <!Doctype html>
 <html lang="en">
-    <head>
-        <meta charset="=utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Home</title>
-    </head>
 
-    <body>
-        <p>
-            <a href="{% url 'keep_inventory:index' %}">Dashboard</a>
-            <a href="{% url 'keep_inventory:sell' %}">Sell</a>
-            <a href="{% url 'keep_inventory:search_transaction_per_date' %}">Transactions</a>
-            <form action="{% url 'users:logout' %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit"style="background:none; border:none; text-decoration:underline; cursor:pointer;">
-                         Log out
-                    </button>
-            </form>
+<head>
+   
+    <meta charset="=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Home</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% bootstrap_css %}
+    {% bootstrap_javascript jquery='full' %}
+</head>
 
+<body>
+    <nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">
+        <a href="{% url 'keep_inventory:index' %}" class="nav-link hover">Dashboard</a>
 
-            {% if user.is_authenticated %}
-                Hello, {{ user.username }}
-            {% else %}
-                <a href="{% url 'users:register' %}">Register</a> 
-                <a href="{% url 'users:login' %}">Log in</a>
-            {% endif %}
-        </p>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+            aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav mr-auto">
 
-{% block content %}{% endblock content %}
+                <li class="nav-item">
+                    <a href="{% url 'keep_inventory:sell' %}" class="nav-link text-primary hover">Sell</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'keep_inventory:search_transaction_per_date' %}"
+                        class="nav-link text-primary hover">Transactions</a>
+                </li>
+            </ul>
 
-    </body>
+            <ul class="navbar-nav mr-auto" style="float:right;">
+
+                <li class="nav-item">
+                    {% if user.is_authenticated %}
+                    Hello, {{ user.username }}
+                </li>
+                <li class="nav-item">
+                    <form action="{% url 'users:logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit"
+                            style="background:none; border:none; text-decoration:none; cursor:pointer;"
+                            class="navbar-link text-primary hover">
+                            Log out
+                        </button>
+                    </form>
+                </li>
+                {% else %}
+                <li class="nav-item"><a href="{% url 'users:register' %}" class="nav-link text-primary hover">Register</a></li>
+                <li class="nav-item"><a href="{% url 'users:login' %}" class="nav-link text-primary hover">Log in</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <main role="main" class="container page bg-light">
+        
+        <div class="pb-2 mb-2 border-bottom" >
+            {% block page_header %}{% endblock page_header %}
+        </div>
+        
+        <div>
+            {% block content %}{% endblock content %}
+        </div>
+    </main>
+
+</body>
 
 </html>

@@ -1,46 +1,51 @@
 {% extends "keep_inventory/base.html" %}
 
 {% block content %}
-
-<p>{{ start_date }} - {{ end_date }}</p>
-
-<h2>Sales Overview</h2>
-<div>
+<div class="date">
+    <p style="margin-top:20px;">{{ start_date }} - {{ end_date }}</p>
     <form method="get" action="{% url  'keep_inventory:search_sales_per_date' %}">
         <label for="start_date">
-            Start Date:
-            <input type="date" id="start_date" name="start_date" required>
+            Start Date
+            <input type="date" id="start_date" name="start_date" required class="select-date">
         </label>
         <label for="end_date">
-            End Date:
-            <input type="date" id="end_date" name="end_date" required>
+            End Date
+            <input type="date" id="end_date" name="end_date" required class="select-date">
         </label>
-        <button type="submit" name = "date">Search</button>
+        <button type="submit" name = "date" class="btn btn-info">Search</button>
     </form>
 </div>
-<div>
-    <div>
-        <h3>NO. OF TRANSACTIONS</h3>
+    <h4 class="text-success" style="margin-left: 90px;">Sales Overview</h4>
+<div class="dashboard-records">
+    <div class="ind-records">
+        <h6>NO. OF TRANSACTIONS</h6>
         {% if sales_count != None %}
-            <p>{{ sales_count }}</p>
+            <p class="number">{{ sales_count }}</p>
         {% endif %}
 
     </div>
-    <div>
-        <h3>TOTAL SALES</h3>
+    <div class="ind-records">
+        <h6>TOTAL SALES</h6>
         {% if total_sales != None %}
-            <p>GH₵{{ total_sales }}</p>
+            <p class="number">GH₵ {{ total_sales }}</p>
         {% endif %}
     </div>
 
 </div>
-<div><p>
-        {% for product in products %}
-            {% if product <= 3 %}
-                only {{ product.total_stock }} of {{ product.product_name }} remains
-            {% endif %}
-        {% endfor %}
+
+ 
+<div class="contain-alerts">
+    <h4>Alerts</h4>
+   
+    {% if low_stock %}
+        {% for stock in low_stock %}
+    <p class="alert alert-danger alert-dismissible fade show"> 
+        <button type="button" class="close" data-dismiss="alert">&times;</button>         
+        <strong>Danger!!! </strong>only <strong>{{ stock.total_stock }}</strong> of <strong>{{ stock.product_name }}</strong> remains  
+         
     </p>
+        {% endfor %}
+    {% endif %}
 </div>
 
 
