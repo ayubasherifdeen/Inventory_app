@@ -104,7 +104,7 @@ class SalesDetail(models.Model):
         return f"Sale Details #{self.id}"
 
 
-class StockAdjustements(models.Model):
+class StockAdjustment(models.Model):
     """Manuel adjustments to stock"""
     product_id = models.ForeignKey(Product,on_delete=models.CASCADE)
     product_name =models.CharField(max_length=200)

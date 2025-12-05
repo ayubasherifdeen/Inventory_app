@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, Sale, SalesDetail, Customer,StockAdjustements
+from .models import Product, Sale, SalesDetail, Customer,StockAdjustment
 
 
 @admin.register(Customer)
@@ -35,8 +35,8 @@ class SalesDetailAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(StockAdjustements)
-class StockAdjustmentsAdmin(admin.ModelAdmin):
+@admin.register(StockAdjustment)
+class StockAdjustmentAdmin(admin.ModelAdmin):
     list_display = ['product_name', 'quantity', 'reason', 'date', 'user']
     readonly_fields = ['product_name', 'quantity', 'reason', 'date', 'user']
     list_filter = ['product_name', 'quantity', 'reason', 'date', 'user']
