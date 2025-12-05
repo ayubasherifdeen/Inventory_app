@@ -143,7 +143,7 @@ def search_transaction_per_date(request):
 
     
 
-    
+
 
 @login_required
 def search_products(request):

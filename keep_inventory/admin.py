@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import Product, Sale, SalesDetail
+from .models import Product, Sale, SalesDetail, Customer,StockAdjustements
+
+
+@admin.register(Customer)
+class CustomerAdmin(admin.ModelAdmin):
+    list_display=['full_name', 'telephone_number']
+    search_fields=['full_name']
 
 
 @admin.register(Product)
@@ -9,11 +15,9 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('product_name',)
 
     
-
-    
 @admin.register(Sale)
 class SaleAdmin(admin.ModelAdmin):
-    list_display=['sales_id','owner', 'sales_date', 'total_amount',]
+    list_display=['sales_id','owner','customer', 'sales_date', 'total_amount',]
     readonly_fields=['sales_id', 'owner', 'sales_date', 'total_amount']
     list_filter = ['sales_date', 'owner']
  
@@ -29,6 +33,14 @@ class SalesDetailAdmin(admin.ModelAdmin):
             "fields": ("formatted_items",),
         }),
     )
+
+
+@admin.register(StockAdjustements)
+class StockAdjustmentsAdmin(admin.ModelAdmin):
+    list_display = ['product_name', 'quantity', 'reason', 'date', 'user']
+    readonly_fields = ['product_name', 'quantity', 'reason', 'date', 'user']
+    list_filter = ['product_name', 'quantity', 'reason', 'date', 'user']
+
 
 
 # Register your models here.

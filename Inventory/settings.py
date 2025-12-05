@@ -37,6 +37,7 @@ INSTALLED_APPS = [
 
     #third part
     'bootstrap4',
+    "phonenumber_field",
 
     #Default django apps
     'django.contrib.admin',
