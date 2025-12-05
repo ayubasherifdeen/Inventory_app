@@ -1,10 +1,10 @@
 {% load bootstrap4 %}
- {% load static %}
+{% load static %}
 <!Doctype html>
 <html lang="en">
 
 <head>
-   
+
     <meta charset="=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Home</title>
@@ -15,7 +15,7 @@
 
 <body>
     <nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">
-        <a href="{% url 'keep_inventory:index' %}" class="nav-link hover">Dashboard</a>
+
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
             aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,19 +23,26 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav mr-auto">
+                <li>
+                    <a href="{% url 'keep_inventory:index' %}" class="nav-link hover navbar-brand text-primary">Dashboard🏡</a>
+                </li>
 
                 <li class="nav-item">
-                    <a href="{% url 'keep_inventory:sell' %}" class="nav-link text-primary hover">Sell</a>
+                    <a href="{% url 'keep_inventory:sell' %}" class="nav-link text-primary hover navbar-brand">Sell</a>
                 </li>
                 <li class="nav-item">
                     <a href="{% url 'keep_inventory:search_transaction_per_date' %}"
-                        class="nav-link text-primary hover">Transactions</a>
+                        class="nav-link text-primary hover navbar-brand">Transactions</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'keep_inventory:search_transaction_per_date' %}"
+                        class="nav-link text-primary hover navbar-brand">Stock Adjustments</a>
                 </li>
             </ul>
 
             <ul class="navbar-nav mr-auto" style="float:right;">
 
-                <li class="nav-item">
+                <li class="nav-item navbar-brand">
                     {% if user.is_authenticated %}
                     Hello, {{ user.username }}
                 </li>
@@ -44,25 +51,27 @@
                         {% csrf_token %}
                         <button type="submit"
                             style="background:none; border:none; text-decoration:none; cursor:pointer;"
-                            class="navbar-link text-primary hover">
+                            class="navbar-link text-primary hover navbar-brand">
                             Log out
                         </button>
                     </form>
                 </li>
                 {% else %}
-                <li class="nav-item"><a href="{% url 'users:register' %}" class="nav-link text-primary hover">Register</a></li>
-                <li class="nav-item"><a href="{% url 'users:login' %}" class="nav-link text-primary hover">Log in</a></li>
+                <li class="nav-item"><a href="{% url 'users:register' %}"
+                        class="nav-link text-primary hover navbar-brand">Register</a></li>
+                <li class="nav-item"><a href="{% url 'users:login' %}"
+                        class="nav-link text-primary hover navbar-brand">Log in</a></li>
                 {% endif %}
             </ul>
         </div>
     </nav>
 
     <main role="main" class="container page bg-light">
-        
-        <div class="pb-2 mb-2 border-bottom" >
+
+        <div class="pb-2 mb-2 border-bottom">
             {% block page_header %}{% endblock page_header %}
         </div>
-        
+
         <div>
             {% block content %}{% endblock content %}
         </div>

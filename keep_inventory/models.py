@@ -4,7 +4,17 @@ import uuid
 from django.contrib.auth.models import User
 from django.db.models import JSONField
 from django.utils.safestring import mark_safe
+from phonenumber_field.modelfields import PhoneNumberField
 
+
+
+class Customer(models.Model):
+    """Customer information"""
+    full_name = models.CharField(max_length=200, null=True, default=None)
+    telephone_number = PhoneNumberField(null=True, blank=True)
+
+    def __str__(self):
+        return self.full_name
 
 
 class Product(models.Model):
@@ -41,18 +51,20 @@ class Product(models.Model):
 
     def __str__(self):
         return self.product_name
-
+    
 
 class Sale(models.Model):
     """A sale made"""
     sales_id=models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sales_date = models.DateTimeField(auto_now_add=True)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=0)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True)
+
 
 class SalesDetail(models.Model):
     """Details of a sales made"""
-    sales_id = models.ForeignKey('Sale', on_delete=models.CASCADE)
+    sales_id = models.ForeignKey(Sale, on_delete=models.CASCADE)
     items = models.JSONField()  # Stores list of products sold in one transaction
     total_quantity = models.IntegerField()
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -90,6 +102,21 @@ class SalesDetail(models.Model):
 
     def __str__(self):
         return f"Sale Details #{self.id}"
+
+
+class StockAdjustements(models.Model):
+    """Manuel adjustments to stock"""
+    product_id = models.ForeignKey(Product,on_delete=models.CASCADE)
+    product_name =models.CharField(max_length=200)
+    quantity = models.IntegerField()
+    reason = models.CharField()
+    date = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+
+    
+
 
 
 

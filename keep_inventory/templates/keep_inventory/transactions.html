@@ -1,21 +1,21 @@
 {% extends "keep_inventory/base.html" %}
 
 {% block content %}
-<div>
+<div class="date">
     <form method="get" action="{% url  'keep_inventory:search_transaction_per_date' %}">
         <label for="start_date_tr">
             Start Date:
-            <input type="date" id="start_date_tr" name="start_date_tr" required>
+            <input type="date" id="start_date_tr" name="start_date_tr" required class="select-date">
         </label>
         <label for="end_date_tr">
             End Date:
-            <input type="date" id="end_date_tr" name="end_date_tr" required>
+            <input type="date" id="end_date_tr" name="end_date_tr" required class="select-date">
         </label>
         <button type="submit" name = "date" class="btn btn-info">Search</button>
     </form>
 </div>
 <div>
-    <p>{{ start_date }} - {{ end_date }}</p>
+    <p style="margin-top:20px;">{{ start_date }} - {{ end_date }}</p>
 </div>
 
 <div>
