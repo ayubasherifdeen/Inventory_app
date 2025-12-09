@@ -12,6 +12,7 @@ class Customer(models.Model):
     """Customer information"""
     full_name = models.CharField(max_length=200, null=True, default=None)
     telephone_number = PhoneNumberField(null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
 
     def __str__(self):
         return self.full_name
@@ -51,6 +52,9 @@ class Product(models.Model):
 
     def __str__(self):
         return self.product_name
+    
+    shortage_threshold = models.IntegerField(null=False, default=1)
+    closest_expiry_date = models.DateField(null=True, default=None)
     
 
 class Sale(models.Model):

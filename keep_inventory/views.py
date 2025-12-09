@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
-from . models import Product, Sale, SalesDetail
+from . models import Product, Sale, SalesDetail, Customer
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from django.contrib import messages
 from django.db.models import Count, Sum
 from datetime import timedelta, date, datetime
+from dateutil.relativedelta import relativedelta
 
 
 # Create your views here.
@@ -30,11 +31,10 @@ def index(request):
         owner=request.user
     ).aggregate(total=Sum('total_amount'))['total']
 
-    #check for shortage
-    threshold = 4
+    #check for shortages
     low_stock = Product.objects.filter(
-        total_stock__lt = threshold
-    ). values('product_name', 'total_stock')
+        total_stock__lte=F('shortage_threshold')
+    ).values('product_name', 'total_stock')
 
 
     # Check if search view passed custom dates via session
@@ -83,7 +83,7 @@ def search_sales_per_date(request):
         request.session['start_date'] = str(start_date)
         request.session['end_date'] = str(end_date)
         request.session['sales_count'] = sales_count
-        request.session['total_sales'] = float(total_sales)
+        request.session['total_sales'] = str(total_sales)
 
     except ValueError:
         pass
@@ -119,8 +119,8 @@ def search_transaction_per_date(request):
         #If date is provided
         try:
             # Convert strings to date objects
-            start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-            end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
 
             # query and count number of sales
             transactions = Sale.objects.filter(
@@ -142,8 +142,7 @@ def search_transaction_per_date(request):
     })
 
     
-
-
+    
 
 @login_required
 def search_products(request):
@@ -276,13 +275,26 @@ def confirm_sale(request):
             request.session['cart'] = []
             request.session['total_amount'] = 0
 
-            messages.success(request, f"Cart cleared, sale succesful")
+            
 
     except Exception:
         # If something breaks, rollback happens automatically
         return redirect("keep_inventory:sell")
 
     return redirect("keep_inventory:sell")
+
+
+def check_expiry(request):
+    """Check for expiry"""
+    today = date.today()
+    four_months_from_now = today + relativedelta(months=4)
+    expiring_soon = Product.objects.filter(
+        closest_expiry_date_lt = four_months_from_now
+    ).values('product_name','closest_expiry_date' )
+
+    expiring_date = Product.objects.filter(
+        closest_expiry_date__gte = today
+    )
 
 
 

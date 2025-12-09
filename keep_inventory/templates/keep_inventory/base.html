@@ -16,55 +16,83 @@
 <body>
     <nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">
 
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+        aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
-            aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav mr-auto">
-                <li>
-                    <a href="{% url 'keep_inventory:index' %}" class="nav-link hover navbar-brand text-primary">Dashboard🏡</a>
-                </li>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
 
-                <li class="nav-item">
-                    <a href="{% url 'keep_inventory:sell' %}" class="nav-link text-primary hover navbar-brand">Sell</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'keep_inventory:search_transaction_per_date' %}"
-                        class="nav-link text-primary hover navbar-brand">Transactions</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'keep_inventory:search_transaction_per_date' %}"
-                        class="nav-link text-primary hover navbar-brand">Stock Adjustments</a>
-                </li>
-            </ul>
+        <ul class="navbar-nav mr-auto">
 
-            <ul class="navbar-nav mr-auto" style="float:right;">
+            <li class="nav-item">
+                <a class="nav-link navbar-brand text-primary hover 
+                   {% if request.resolver_match.url_name == 'index' %}active{% endif %}"
+                   href="{% url 'keep_inventory:index' %}">
+                    Dashboard🏡
+                </a>
+            </li>
 
-                <li class="nav-item navbar-brand">
-                    {% if user.is_authenticated %}
-                    Hello, {{ user.username }}
-                </li>
-                <li class="nav-item">
-                    <form action="{% url 'users:logout' %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit"
-                            style="background:none; border:none; text-decoration:none; cursor:pointer;"
-                            class="navbar-link text-primary hover navbar-brand">
-                            Log out
-                        </button>
-                    </form>
-                </li>
-                {% else %}
-                <li class="nav-item"><a href="{% url 'users:register' %}"
-                        class="nav-link text-primary hover navbar-brand">Register</a></li>
-                <li class="nav-item"><a href="{% url 'users:login' %}"
-                        class="nav-link text-primary hover navbar-brand">Log in</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </nav>
+            <li class="nav-item">
+                <a class="nav-link navbar-brand text-primary hover
+                   {% if request.resolver_match.url_name == 'sell' %}active{% endif %}"
+                   href="{% url 'keep_inventory:sell' %}">
+                    Sell
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link navbar-brand text-primary hover
+                   {% if request.resolver_match.url_name == 'search_transaction_per_date' %}active{% endif %}"
+                   href="{% url 'keep_inventory:search_transaction_per_date' %}">
+                    Transactions
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link navbar-brand text-primary hover"
+                   href="{% url 'keep_inventory:search_transaction_per_date' %}">
+                    Stock Adjustments
+                </a>
+            </li>
+
+        </ul>
+
+        <ul class="navbar-nav ml-auto">
+
+            {% if user.is_authenticated %}
+            <li class="nav-item navbar-brand">
+                Hello, {{ user.username.title }}
+            </li>
+
+            <li class="nav-item">
+                <form action="{% url 'users:logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link text-primary navbar-brand hover
+                    {% if request.resolver_match.url_name == 'logout' %}active{% endif %}"
+                        style="background:none; border:none; cursor:pointer;">
+                        Log out
+                    </button>
+                </form>
+            </li>
+
+            {% else %}
+            <li class="nav-item">
+                <a href="{% url 'users:register' %}" class="nav-link text-primary navbar-brand hover
+                {% if request.resolver_match.url_name == 'register' %}active{% endif %}">
+                Register</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'users:login' %}" class="nav-link text-primary navbar-brand hover
+                {% if request.resolver_match.url_name == 'login' %}active{% endif %}">Log in</a>
+            </li>
+            {% endif %}
+
+        </ul>
+
+    </div>
+</nav>
+
 
     <main role="main" class="container page bg-light">
 
