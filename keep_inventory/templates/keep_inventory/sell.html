@@ -2,6 +2,12 @@
 
 {% block content %}
 <div class="search-section">
+    <form method="get" action="{% url 'keep_inventory:sell' %}">
+        {% csrf_token %}
+        <input type="text" name="c" value="{{ query }}" placeholder="🔍 Search customer..." autofocus>
+        <button type="submit" class="btn btn-info">Search</button>
+    </form>
+
     
     <h2>Search Products</h2>
 
@@ -12,7 +18,8 @@
     </form>
 
     {% if query %}
-    <h3>Results for "{{ query }}":</h3>
+    <p>Results for "{{ query }}":</p>
+    
     {% if results %}
     <table class="table-hover table-bordered table">
         <tr>

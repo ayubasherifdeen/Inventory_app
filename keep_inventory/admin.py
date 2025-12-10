@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, Sale, SalesDetail, Customer,StockAdjustements
+from .models import Product, Sale, SalesDetail, Customer,StockAdjustment
 
 
 @admin.register(Customer)
@@ -10,7 +10,9 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display=['product_name','unit_cost_price', 'unit_selling_price','unit_profit', 'total_stock','total_profit' ]
+    list_display=['product_name','unit_cost_price', 'unit_selling_price'
+                  ,'unit_profit', 'total_stock','total_profit',
+                    'closest_expiry_date']
     readonly_fields = ['unit_profit','total_stock','total_profit', ]
     search_fields = ('product_name',)
 
@@ -19,7 +21,7 @@ class ProductAdmin(admin.ModelAdmin):
 class SaleAdmin(admin.ModelAdmin):
     list_display=['sales_id','owner','customer', 'sales_date', 'total_amount',]
     readonly_fields=['sales_id', 'owner', 'sales_date', 'total_amount']
-    list_filter = ['sales_date', 'owner']
+    list_filter = ['sales_date', 'owner', 'customer']
  
 
 @admin.register(SalesDetail)
@@ -35,11 +37,11 @@ class SalesDetailAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(StockAdjustements)
-class StockAdjustmentsAdmin(admin.ModelAdmin):
+@admin.register(StockAdjustment)
+class StockAdjustmentAdmin(admin.ModelAdmin):
     list_display = ['product_name', 'quantity', 'reason', 'date', 'user']
     readonly_fields = ['product_name', 'quantity', 'reason', 'date', 'user']
-    list_filter = ['product_name', 'quantity', 'reason', 'date', 'user']
+    list_filter = ['product_name', 'reason', 'date', 'user']
 
 
 
