@@ -36,12 +36,40 @@
  
 <div class="contain-alerts">
     <h4>Alerts</h4>
-   
     {% if low_stock %}
         {% for stock in low_stock %}
     <p class="alert alert-danger alert-dismissible fade show"> 
         <button type="button" class="close" data-dismiss="alert">&times;</button>         
         <strong>Danger!!! </strong>only <strong>{{ stock.total_stock }}</strong> of <strong>{{ stock.product_name }}</strong> remains  
+         
+    </p>
+        {% endfor %}
+    {% endif %}
+
+    {% if expiring_soon %}
+        {% for expiry in expiring_soon %}
+    <p class="alert alert-warning alert-dismissible fade show"> 
+        <button type="button" class="close" data-dismiss="alert">&times;</button>         
+        <strong>Warning!!! </strong> <strong>{{ expiry.product_name }}</strong> expires soon on <strong>{{ expiry.closest_expiry_date }}</strong> 
+         
+    </p>
+        {% endfor %}
+    {% endif %}
+
+    {% if expiring_today %}
+        {% for expiring_product in expiring_today %}
+    <p class="alert alert-danger alert-dismissible fade show"> 
+        <button type="button" class="close" data-dismiss="alert">&times;</button>         
+        <strong>Danger!!! </strong> <strong>{{ expiring_product.product_name }}</strong> expires today: <strong>{{ expiring_product.closest_expiry_date }}</strong> 
+         
+    </p>
+        {% endfor %}
+
+    {% if expired %}
+        {% for expired_product in expired %}
+    <p class="alert alert-danger alert-dismissible fade show"> 
+        <button type="button" class="close" data-dismiss="alert">&times;</button>         
+        <strong>Danger!!! </strong> <strong>{{ expired_product.product_name }}</strong> elasped on <strong>{{ expired_product.closest_expiry_date }}</strong> 
          
     </p>
         {% endfor %}

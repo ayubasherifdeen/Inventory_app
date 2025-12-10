@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
-from . models import Product, Sale, SalesDetail, Customer
+from . models import Product, Sale, SalesDetail
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
@@ -36,12 +36,17 @@ def index(request):
         total_stock__lte=F('shortage_threshold')
     ).values('product_name', 'total_stock')
 
+    #check for expiry
+    expiring_soon = check_expiring_soon(request)
+    expiring_today = check_expiring_today(request)
+    expired = check_expired(request)
+
 
     # Check if search view passed custom dates via session
     start_date = request.session.pop('start_date', today)
     end_date = request.session.pop('end_date', tomorrow)
     sales_count = request.session.pop('sales_count', sales_count)
-    total_sales = request.session.pop('total_sales', 0)
+    total_sales = request.session.pop('total_sales', total_sales)
 
     return render(request, 'keep_inventory/index.html', {
         'sales_count': sales_count,
@@ -49,6 +54,9 @@ def index(request):
         'start_date': start_date,
         'end_date': end_date,
         'low_stock':low_stock,
+        'expiring_soon':expiring_soon,
+        'expiring_today':expiring_today,
+        'expired':expired,
         'auto_load': True,
     })
 
@@ -284,16 +292,35 @@ def confirm_sale(request):
     return redirect("keep_inventory:sell")
 
 
-def check_expiry(request):
-    """Check for expiry"""
+def check_expiring_soon(request):
+    """Check for products expiring within the next 3 months"""
     today = date.today()
-    four_months_from_now = today + relativedelta(months=4)
-    expiring_soon = Product.objects.filter(
-        closest_expiry_date_lt = four_months_from_now
-    ).values('product_name','closest_expiry_date' )
+    three_months_from_now = today + relativedelta(months=3)
+    return list(
+        Product.objects.filter(
+        closest_expiry_date__lt = three_months_from_now,
+        closest_expiry_date__gte=today 
+        ).values('product_name','closest_expiry_date' )
+    )
 
-    expiring_date = Product.objects.filter(
-        closest_expiry_date__gte = today
+def check_expiring_today(request):
+    """Check for products expiring today"""
+    today = date.today()
+
+    return list(
+        Product.objects.filter(
+        closest_expiry_date = today
+        ).values('product_name','closest_expiry_date' )
+    )
+
+def check_expired(request):
+    """Check for products whose expiring dates have elapsed"""
+    today = date.today()
+
+    return list(
+        Product.objects.filter(
+        closest_expiry_date__lt = today
+        ).values('product_name','closest_expiry_date' )
     )
 
 
