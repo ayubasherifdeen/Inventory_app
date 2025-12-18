@@ -7,10 +7,12 @@
 
 {% block content %}
     <form method="post" action="{% url 'users:register' %}" class="form">
+        
         {% csrf_token %}
         {% bootstrap_form form %}
         <button name="submit" class="btn btn-lg btn-primary">Register</button>
         <input type="hidden" name="next" value="{% url 'keep_inventory:index' %}"/>
+        
 
     </form>
 {% endblock content %}

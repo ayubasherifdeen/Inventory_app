@@ -12,7 +12,7 @@ urlpatterns = [
     #add to cart
     path('add_to_cart/', views.add_to_cart, name='add_to_cart'),
     #remove from cart
-    path('remove_from_cart/<str:product_id>/', views.remove_from_cart, name='remove_from_cart'),
+    path('remove_from_cart/<str:sku>/', views.remove_from_cart, name='remove_from_cart'),
     #checkout the cart
     path('confirm_sale', views.confirm_sale, name='confirm_sale'),
     #sales count and sum

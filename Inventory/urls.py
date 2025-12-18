@@ -23,3 +23,7 @@ urlpatterns = [
     path('', include('keep_inventory.urls')),
 
 ]
+
+admin.site.index_title = "The Shop"
+admin.site.site_header = "StockTrack Adminstration"
+admin.site.site_title = "StockTrack Adminstration"

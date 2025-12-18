@@ -176,24 +176,24 @@ def add_to_cart(request):
     """Add to cart"""
     #check post method and request session
     if request.method=="POST":
-        product_id = request.POST.get('product_id')
+        sku = request.POST.get('sku')
         quantity =int(request.POST.get('quantity', 1))
         cart = request.session.get('cart', [])
         
-        if not product_id:
+        if not sku:
             return redirect('keep_inventory:sell')
 
-        product = get_object_or_404(Product, product_id=product_id)
+        product = get_object_or_404(Product, sku=sku)
 
         #check if an item has already been added or not
         for item in cart:
-           if item['product_id'] == str(product.product_id):
+           if item['sku'] == str(product.sku):
                item['quantity'] += quantity
                item['amount'] = float(product.unit_selling_price) * item['quantity']
                break
         else:
             cart.append({
-            'product_id': str(product.product_id),
+            'sku': str(product.sku),
             'product_name': product.product_name,
             'unit_selling_price': float(product.unit_selling_price),
             'quantity': quantity,
@@ -212,11 +212,11 @@ def add_to_cart(request):
     return redirect('keep_inventory:sell')
 
 
-def remove_from_cart(request, product_id):
+def remove_from_cart(request, sku):
     """Remove a selected item from cart"""
     cart =request.session.get('cart', [])
      # Filter out the product you want to remove
-    updated_cart = [item for item in cart if item['product_id'] != product_id]
+    updated_cart = [item for item in cart if item['sku'] != sku]
 
     #recalculate cart total
     total_amount = sum(item['amount'] for item in updated_cart)
@@ -254,10 +254,10 @@ def confirm_sale(request):
             total_quantity = 0
 
             for item in cart:
-                product = Product.objects.get(product_id=item['product_id'])
+                product = Product.objects.get(sku=item['sku'])
 
                 items.append({
-                    "product_id": str(product.product_id),
+                    "sku": str(product.sku),
                     "product_name": product.product_name,
                     "quantity": item['quantity'],
                     "unit_price": float(item['unit_selling_price']),
@@ -267,7 +267,7 @@ def confirm_sale(request):
                 total_quantity += item['quantity']
 
                 # Reduce stock
-                Product.objects.filter(product_id=product.product_id).update(
+                Product.objects.filter(sku=product.sku).update(
                     total_stock=F('total_stock') - item['quantity']
                 )
 
