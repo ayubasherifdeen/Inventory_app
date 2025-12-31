@@ -19,5 +19,9 @@ urlpatterns = [
     path('search_sales_per_date/', views.search_sales_per_date, name='search_sales_per_date'),
     #transaction history
     path('search_transaction_per_date/', views.search_transaction_per_date, name='search_transaction_per_date'),
+    #transaction details
+    path(
+    "sales/<int:sale_id>/details/", views.sale_details_api, name="sale_details_api"
+)
 
 ]

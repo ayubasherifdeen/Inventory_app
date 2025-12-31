@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.db.models import Count, Sum
 from datetime import timedelta, date, datetime
 from dateutil.relativedelta import relativedelta
-
+from django.http import JsonResponse
 
 # Create your views here.
 @login_required
@@ -187,7 +187,7 @@ def add_to_cart(request):
 
         #check if an item has already been added or not
         for item in cart:
-           if item['sku'] == str(product.sku):
+           if item['sku'] == product.sku:
                item['quantity'] += quantity
                item['amount'] = float(product.unit_selling_price) * item['quantity']
                break
@@ -200,8 +200,8 @@ def add_to_cart(request):
             'amount': float(product.unit_selling_price) * quantity,
                 })
             
-            #calculate total amount for all items
-            total_amount = sum(item['amount'] for item in cart)
+        #calculate total amount for all items
+        total_amount = sum(item['amount'] for item in cart)
 
         #update cart session
         request.session['cart'] = cart
@@ -252,7 +252,7 @@ def confirm_sale(request):
             # Prepare items list and update stock
             items = []
             total_quantity = 0
-
+           
             for item in cart:
                 product = Product.objects.get(sku=item['sku'])
 
@@ -289,7 +289,9 @@ def confirm_sale(request):
         # If something breaks, rollback happens automatically
         return redirect("keep_inventory:sell")
 
-    return redirect("keep_inventory:sell")
+    return render(request, "keep_inventory/sale_success.html", {
+            "sales_id": sale.sales_id,
+        })
 
 
 def check_expiring_soon(request):
@@ -323,6 +325,23 @@ def check_expired(request):
         ).values('product_name','closest_expiry_date' )
     )
 
+
+
+def sale_details_api(request, sale_id):
+    sale = get_object_or_404(
+        Sale.objects.select_related('salesdetail'),
+        sales_id=sale_id,
+        owner=request.user
+    )
+    
+    if not hasattr(sale, 'salesdetail'):
+        return JsonResponse({"error": "Details not found"}, status=404)
+    
+    return JsonResponse({
+        "sale_date": sale.sales_date.strftime("%Y-%m-%d %H:%M"),
+        "total_amount": str(sale.total_amount),
+        "items": sale.salesdetail.items,
+    })
 
 
 

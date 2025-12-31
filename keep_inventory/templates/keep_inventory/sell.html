@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="search-section">
-    
+
     <h2>Search Products</h2>
 
     <form method="get" action="{% url 'keep_inventory:sell' %}">
@@ -16,29 +16,33 @@
 
     {% if results %}
     <table class="table-striped table">
-        <tr>
-            <th>SKU</th>
-            <th>Product</th>
-            <th>Rate</th>
-            <th>Quantity in Stock</th>
-            <th>Purchasing Quantity</th>
-        </tr>
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Product</th>
+                <th>Rate</th>
+                <th>Quantity in Stock</th>
+                <th>Purchasing Quantity</th>
+            </tr>
+        </thead>
         {% for product in results %}
-        <tr>
-            <td>{{ product.sku }}</td>
-            <td>{{ product.product_name }}</td>
-            <td>{{ product.unit_selling_price }}</td>
-            <td>{{ product.total_stock }}</td>
-            <td>
-                <form method="post" action="{% url 'keep_inventory:add_to_cart' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="sku" value="{{ product.sku }}">
-                    <input type="number" min="1" max="{{ product.total_stock }}" name="quantity" required>
-                    <button type="submit">➕Add</button>
-                </form>
-            </td>
+        <tbody>
+            <tr>
+                <td>{{ product.sku }}</td>
+                <td>{{ product.product_name }}</td>
+                <td>{{ product.unit_selling_price }}</td>
+                <td>{{ product.total_stock }}</td>
+                <td>
+                    <form method="post" action="{% url 'keep_inventory:add_to_cart' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="sku" value="{{ product.sku }}">
+                        <input type="number" min="1" max="{{ product.total_stock }}" name="quantity" required>
+                        <button type="submit">➕Add</button>
+                    </form>
+                </td>
 
-        </tr>
+            </tr>
+        </tbody>
         {% endfor %}
     </table>
     {% else %}
@@ -51,28 +55,32 @@
     <h2>Confirmation Table</h2>
     {% if cart %}
     <table class="table-striped table">
-        <tr>
-            <th>SKU</th>
-            <th>Product</th>
-            <th>Rate</th>
-            <th>Purchasing Quantity</th>
-            <th>Amount</th>
-            <th>Action</th>
-        </tr>
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Product</th>
+                <th>Rate</th>
+                <th>Purchasing Quantity</th>
+                <th>Amount</th>
+                <th>Action</th>
+            </tr>
+        </thead>
         {% for item in cart %}
-        <tr>
-            <td>{{ item.sku }}</td>
-            <td>{{ item.product_name }}</td>
-            <td>{{ item.unit_selling_price }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.amount }}</td>
-            <td>
-                <form method="POST" action="{% url 'keep_inventory:remove_from_cart' item.sku %}">
-                    {% csrf_token %}
-                    <button type="submit" name="remove" value="remove">❌</button>
-                </form>
-            </td>
-        </tr>
+        <tbody>
+            <tr>
+                <td>{{ item.sku }}</td>
+                <td>{{ item.product_name }}</td>
+                <td>{{ item.unit_selling_price }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.amount }}</td>
+                <td>
+                    <form method="POST" action="{% url 'keep_inventory:remove_from_cart' item.sku %}">
+                        {% csrf_token %}
+                        <button type="submit" name="remove" value="remove">❌</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
         {% endfor %}
     </table>
     {% if cart %}

@@ -70,3 +70,7 @@ h1,h2,h3,h4,h5,h6{
     border-radius: 5px;
     margin:0;
 }
+
+.currency { 
+    font-family: 'Courier New', monospace; 
+}
