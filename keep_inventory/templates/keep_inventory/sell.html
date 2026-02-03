@@ -21,8 +21,10 @@
                 <th>SKU</th>
                 <th>Product</th>
                 <th>Rate</th>
-                <th>Quantity in Stock</th>
+                <th>Status</th>
+                <th>Stock info</th>
                 <th>Purchasing Quantity</th>
+                <th>Action</th>
             </tr>
         </thead>
         {% for product in results %}
@@ -31,13 +33,27 @@
                 <td>{{ product.sku }}</td>
                 <td>{{ product.product_name }}</td>
                 <td>{{ product.unit_selling_price }}</td>
+                <td>
+                    <div style="border:1px solid #000; border-radius:15px; color:white; text-align:center;">
+                    {% if product.total_stock == 0 %}
+                            <div style="background-color:#800020; border:1px solid #000; border-radius:15px; color:white; text-align:center;">sold out</div>
+                        {% elif product.total_stock <= product.shortage_threshold %}
+                            <div style="background-color:#FEBE10; border:1px solid #000; border-radius:15px; color:white; text-align:center;">low in stock</div>
+                        {% else %}
+                           <div style="background-color:#4F7942; border:1px solid #000; border-radius:15px; color:white; text-align:center;">active</div>
+                    {% endif %}  
+                    </div>           
+                </td>
                 <td>{{ product.total_stock }}</td>
                 <td>
                     <form method="post" action="{% url 'keep_inventory:add_to_cart' %}">
                         {% csrf_token %}
                         <input type="hidden" name="sku" value="{{ product.sku }}">
-                        <input type="number" min="1" max="{{ product.total_stock }}" name="quantity" required>
-                        <button type="submit">➕Add</button>
+                        <input type="number" min="1" max="{{ product.total_stock }}" name="quantity" required style="width:50px;">
+                        
+                </td>
+                <td>
+                    <button type="submit">➕Add</button>
                     </form>
                 </td>
 
@@ -49,6 +65,11 @@
     <p>No results found.</p>
     {% endif %}
     {% endif %}
+</div>
+
+
+        
+    </tbody>
 </div>
 
 <div class="confirmation-section">

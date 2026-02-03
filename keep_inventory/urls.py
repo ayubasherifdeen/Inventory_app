@@ -1,4 +1,4 @@
-"""Defines URL patterns for learning_logs"""
+"""Defines URL patterns for keep_inventory"""
 from django.urls import path
 from . import views
 

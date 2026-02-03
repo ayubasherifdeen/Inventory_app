@@ -40,4 +40,3 @@ class StockAdjustmentAdmin(admin.ModelAdmin):
     list_filter = ['product_name', 'reason', 'date', 'user']
 
 
-# Register your models here.

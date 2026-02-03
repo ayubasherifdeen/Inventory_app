@@ -74,3 +74,11 @@ h1,h2,h3,h4,h5,h6{
 .currency { 
     font-family: 'Courier New', monospace; 
 }
+
+.active {
+    color:white;
+    border:solid 1px black;
+    border-radius: 8px;
+    background-color: #4F7942;
+
+}

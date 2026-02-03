@@ -60,6 +60,7 @@ def index(request):
         'auto_load': True,
     })
 
+
 @login_required
 def search_sales_per_date(request):
     start_date_str = request.GET.get('start_date')
@@ -85,18 +86,22 @@ def search_sales_per_date(request):
         total_sales = Sale.objects.filter(
             sales_date__range=(start_date, end_date_next),
             owner=request.user
-        ).aggregate(total=Sum('total_amount'))['total']
+            ).aggregate(total=Sum('total_amount'))['total']
 
         # Store results in session
         request.session['start_date'] = str(start_date)
         request.session['end_date'] = str(end_date)
         request.session['sales_count'] = sales_count
-        request.session['total_sales'] = str(total_sales)
+        request.session['total_sales'] = total_sales
 
     except ValueError:
         pass
 
     return redirect('keep_inventory:index')
+
+
+
+
 
 
 
@@ -281,21 +286,17 @@ def confirm_sale(request):
 
             # Clear session
             request.session['cart'] = []
-            request.session['total_amount'] = 0
-
-            
+            request.session['total_amount'] = 0    
 
     except Exception:
         # If something breaks, rollback happens automatically
         return redirect("keep_inventory:sell")
 
-    return render(request, "keep_inventory/sale_success.html", {
-            "sales_id": sale.sales_id,
-        })
+    return redirect("keep_inventory:sell")
 
 
 def check_expiring_soon(request):
-    """Check for products expiring within the next 3 months"""
+    """Check for products expiring within the next month"""
     today = date.today()
     three_months_from_now = today + relativedelta(months=3)
     return list(
