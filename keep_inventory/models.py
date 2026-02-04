@@ -62,7 +62,7 @@ class Sale(models.Model):
 class SalesDetail(models.Model):
     """Details of a sales made"""
     sales_detail_id=models.BigAutoField(primary_key=True)
-    sales_id = models.ForeignKey(Sale, on_delete=models.CASCADE)
+    sales_id = models.OneToOneField(Sale, related_name="salesdetail", on_delete=models.CASCADE)
     items = models.JSONField()  # Stores list of products sold in one transaction
     total_quantity = models.IntegerField()
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -74,6 +74,7 @@ class SalesDetail(models.Model):
 
         html = """
         <table style="border-collapse: collapse; width: 100%;">
+        <thead>
             <tr style="background: #f2f2f2;">
                 <th style="border: 1px solid #ccc; padding: 6px;">SKU</th>
                 <th style="border: 1px solid #ccc; padding: 6px;">Product</th>
@@ -81,10 +82,12 @@ class SalesDetail(models.Model):
                 <th style="border: 1px solid #ccc; padding: 6px;">Price</th>
                 <th style="border: 1px solid #ccc; padding: 6px;">Subtotal</th>
             </tr>
+        </thead>
         """
 
         for item in self.items:
             html += f"""
+            <tbody>
             <tr>
                 <td style="border: 1px solid #ccc; padding: 6px;">{item['sku']}</td>
                 <td style="border: 1px solid #ccc; padding: 6px;">{item['product_name']}</td>
@@ -92,6 +95,7 @@ class SalesDetail(models.Model):
                 <td style="border: 1px solid #ccc; padding: 6px;">{item['unit_price']}</td>
                 <td style="border: 1px solid #ccc; padding: 6px;">{item['amount']}</td>
             </tr>
+            </tbody>
             """
 
         html += "</table>"
@@ -105,7 +109,7 @@ class SalesDetail(models.Model):
 
 class StockAdjustment(models.Model):
     """Manuel adjustments to stock made in user's site"""
-    product_id = models.ForeignKey(Product,on_delete=models.CASCADE)
+    sku = models.ForeignKey(Product,on_delete=models.CASCADE)
     product_name =models.CharField(max_length=200)
     quantity = models.IntegerField()
     reason = models.CharField()

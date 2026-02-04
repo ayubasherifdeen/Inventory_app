@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.db.models import Count, Sum
 from datetime import timedelta, date, datetime
 from dateutil.relativedelta import relativedelta
-
+from django.http import JsonResponse
 
 # Create your views here.
 @login_required
@@ -60,6 +60,7 @@ def index(request):
         'auto_load': True,
     })
 
+
 @login_required
 def search_sales_per_date(request):
     start_date_str = request.GET.get('start_date')
@@ -85,18 +86,22 @@ def search_sales_per_date(request):
         total_sales = Sale.objects.filter(
             sales_date__range=(start_date, end_date_next),
             owner=request.user
-        ).aggregate(total=Sum('total_amount'))['total']
+            ).aggregate(total=Sum('total_amount'))['total']
 
         # Store results in session
         request.session['start_date'] = str(start_date)
         request.session['end_date'] = str(end_date)
         request.session['sales_count'] = sales_count
-        request.session['total_sales'] = str(total_sales)
+        request.session['total_sales'] = total_sales
 
     except ValueError:
         pass
 
     return redirect('keep_inventory:index')
+
+
+
+
 
 
 
@@ -187,7 +192,7 @@ def add_to_cart(request):
 
         #check if an item has already been added or not
         for item in cart:
-           if item['sku'] == str(product.sku):
+           if item['sku'] == product.sku:
                item['quantity'] += quantity
                item['amount'] = float(product.unit_selling_price) * item['quantity']
                break
@@ -200,8 +205,8 @@ def add_to_cart(request):
             'amount': float(product.unit_selling_price) * quantity,
                 })
             
-            #calculate total amount for all items
-            total_amount = sum(item['amount'] for item in cart)
+        #calculate total amount for all items
+        total_amount = sum(item['amount'] for item in cart)
 
         #update cart session
         request.session['cart'] = cart
@@ -252,7 +257,7 @@ def confirm_sale(request):
             # Prepare items list and update stock
             items = []
             total_quantity = 0
-
+           
             for item in cart:
                 product = Product.objects.get(sku=item['sku'])
 
@@ -281,9 +286,7 @@ def confirm_sale(request):
 
             # Clear session
             request.session['cart'] = []
-            request.session['total_amount'] = 0
-
-            
+            request.session['total_amount'] = 0    
 
     except Exception:
         # If something breaks, rollback happens automatically
@@ -293,7 +296,7 @@ def confirm_sale(request):
 
 
 def check_expiring_soon(request):
-    """Check for products expiring within the next 3 months"""
+    """Check for products expiring within the next month"""
     today = date.today()
     three_months_from_now = today + relativedelta(months=3)
     return list(
@@ -323,6 +326,23 @@ def check_expired(request):
         ).values('product_name','closest_expiry_date' )
     )
 
+
+
+def sale_details_api(request, sale_id):
+    sale = get_object_or_404(
+        Sale.objects.select_related('salesdetail'),
+        sales_id=sale_id,
+        owner=request.user
+    )
+    
+    if not hasattr(sale, 'salesdetail'):
+        return JsonResponse({"error": "Details not found"}, status=404)
+    
+    return JsonResponse({
+        "sale_date": sale.sales_date.strftime("%Y-%m-%d %H:%M"),
+        "total_amount": str(sale.total_amount),
+        "items": sale.salesdetail.items,
+    })
 
 
 

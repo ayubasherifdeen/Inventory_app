@@ -17,6 +17,7 @@
 </head>
 
 <body>
+    
     <nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
@@ -52,13 +53,7 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link navbar-brand text-primary hover"
-                   href="{% url 'keep_inventory:search_transaction_per_date' %}">
-                    Stock Adjustments
-                </a>
-            </li>
-
+            
         </ul>
 
         <ul class="navbar-nav ml-auto">
@@ -107,7 +102,7 @@
             {% block content %}{% endblock content %}
         </div>
     </main>
-
+    <script src="{% static 'Javascript/script.js' %}"></script>
 </body>
 
 </html>
