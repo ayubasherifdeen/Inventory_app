@@ -13,5 +13,6 @@
         <button name="submit" class="btn btn-primary">Log in</button>
         {% endbuttons %}
         <input type="hidden" name="next" value="{% url 'keep_inventory:index' %}"/>
+        <a href="{% url 'users:password_reset' %}">Forgot password</a>
     </form>
 {% endblock content %}
