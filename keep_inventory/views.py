@@ -351,11 +351,10 @@ def adjust_stock(request):
     adjust stock
     """
     if request.method == 'POST':
-        stock_choice = request.POST.get('product_action')
-        
-        if stock_choice == 'stock_in':
+            
+        if request.POST.get('stock_in'):
             return redirect('keep_inventory:stock_in')
-        elif stock_choice == 'stock_out':
+        elif request.POST.get('stock_out'):
             return redirect('keep_inventory:stock_out')
         else:
             messages.error(request, 'Please select an action.')
