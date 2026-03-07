@@ -1,6 +1,64 @@
 {% extends "keep_inventory/base.html" %}
 
 {% block content %}
+
+<div class="container mt-4">
+    <!-- The Manage Products Button -->
+    <div class="management-section">
+        <button 
+            type="button" 
+            class="btn btn-primary btn-lg btn-manage"
+            onclick="toggleProductActions(this)">
+            Adjust Stock
+            <span class="arrow">▼</span>
+        </button>
+
+        <form method="post"action="{% url 'keep_inventory:stock_in' %}">
+                {% csrf_token %}
+            <div id="productActionsDropdown" class="action-dropdown">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="mb-3"><strong>Choose an action:</strong></p>
+        
+        
+                        <!-- Add Product Option -->
+                        <label class="action-option" onclick="selectOption(this)">
+                            <input type="radio" name="product_action" value="stock_in" id="addProductRadio">
+                            <div class="option-content">
+                                <div class="option-title">Add Product</div>
+                                <p class="option-description">
+                                    Create a new product entry in the inventory
+                                </p>
+                            </div>
+                        </label>
+        
+                        <!-- Remove Product Option -->
+                        <label class="action-option" onclick="selectOption(this)">
+                            <input type="radio" name="product_action" value="stock_out" id="removeProductRadio">
+                            <div class="option-content">
+                                <div class="option-title">🗑️Remove Product</div>
+                                <p class="option-description">
+                                    Delete a product from the inventory
+                                </p>
+                            </div>
+                        </label>
+        
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button type="button" class="btn btn-secondary" onclick="cancelAction()">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-success" onclick="proceedWithAction()" name="continue">
+                                Continue
+                            </button>
+                        </div>
+        
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 <div class="search-section">
 
     <h2>Search Products</h2>
@@ -68,9 +126,8 @@
 </div>
 
 
-        
-    </tbody>
-</div>
+
+  
 
 <div class="confirmation-section">
     <h2>Confirmation Table</h2>
@@ -115,5 +172,57 @@
     <p>No items added yet.</p>
     {% endif %}
 </div>
+
+<script>
+    function toggleProductActions(button) {
+    const dropdown = document.getElementById('productActionsDropdown');
+    
+    if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        button.classList.remove('expanded');
+    } else {
+        dropdown.classList.add('show');
+        button.classList.add('expanded');
+    }
+}
+
+function selectOption(label) {
+    document.querySelectorAll('.action-option').forEach(function(option) {
+        option.classList.remove('selected');
+    });
+    label.classList.add('selected');
+}
+
+function cancelAction() {
+    const dropdown = document.getElementById('productActionsDropdown');
+    const button = document.querySelector('.btn-manage');
+    
+    dropdown.classList.remove('show');
+    button.classList.remove('expanded');
+    
+    document.querySelectorAll('input[name="product_action"]').forEach(function(radio) {
+        radio.checked = false;
+    });
+    
+    document.querySelectorAll('.action-option').forEach(function(option) {
+        option.classList.remove('selected');
+    });
+}
+
+function proceedWithAction() {
+    // Get selected radio button
+    const selected = document.querySelector('input[name="product_action"]:checked');
+    
+    if (!selected) {
+        alert('Please select an action (Add or Remove)');
+        return;
+    }
+    
+   
+}
+
+
+
+</script>
 
 {% endblock content %}

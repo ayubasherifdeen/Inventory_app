@@ -38,11 +38,21 @@
     <h4>Alerts</h4>
     {% if low_stock %}
         {% for stock in low_stock %}
-    <p class="alert alert-danger alert-dismissible fade show"> 
-        <button type="button" class="close" data-dismiss="alert">&times;</button>         
-        <strong>Danger!!! </strong>only <strong>{{ stock.total_stock }}</strong> of <strong>{{ stock.product_name }}</strong> remains  
+            {% if stock.total_stock == 0 %}
+                
+                <p class="alert alert-danger alert-dismissible fade show"> 
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>         
+                    <strong>Danger!!! </strong> <strong>{{ stock.product_name }}</strong> is sold out
          
-    </p>
+                </p>
+                {% else %}
+                <p class="alert alert-warning alert-dismissible fade show"> 
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>         
+                    <strong>Warning!!! </strong> <strong>{{ stock.product_name }}</strong> is low in stock<strong>({{ stock.total_stock }})</strong>  
+         
+                </p>
+                
+            {% endif %}
         {% endfor %}
     {% endif %}
 

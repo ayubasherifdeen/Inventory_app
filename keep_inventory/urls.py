@@ -22,7 +22,9 @@ urlpatterns = [
     path('search_transaction_per_date/', views.search_transaction_per_date, name='search_transaction_per_date'),
     #transaction details
     path(
-    "sales/<int:sale_id>/details/", views.sale_details_api, name="sale_details_api"
-)
-
+    "sales/<int:sale_id>/details/", views.sale_details_api, name="sale_details_api"),
+    #add product
+    path('stock_in', views.stock_in, name='stock_in'),
+    #remove product
+    path('stock_out', views.stock_out, name='stock_out')
 ]

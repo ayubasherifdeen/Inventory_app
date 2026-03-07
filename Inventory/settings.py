@@ -32,12 +32,14 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     #My apps
-    'keep_inventory',
-    'users',
 
-    #third part
+    'users',
+    'keep_inventory.apps.KeepInventoryConfig',
+
+    #third party
     'bootstrap4',
     "phonenumber_field",
+    'rangefilter',
 
     #Default django apps
     'django.contrib.admin',
@@ -124,6 +126,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "keep_inventory" /"static"
+    ]   
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -133,10 +138,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #my settings
 LOGIN_URL = 'users:login'
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "keep_inventory" /"static"
-    ]   
 
 #Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

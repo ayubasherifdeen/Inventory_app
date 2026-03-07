@@ -10,14 +10,13 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 class Product(models.Model):
     """A product sold by the shop"""
-    sku = models.CharField(primary_key=True, max_length=15)
+    sku = models.CharField(primary_key=True, max_length=18)
     product_name = models.CharField(max_length=200)
     unit_cost_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
     unit_selling_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
-
-    # Now represents current stock
+    # current stock
     total_stock = models.IntegerField(null=True, default=0)  
-    # Temporary field for new stock additions
+    # Temporary field for new stock additions or substractions
     add_stock = models.PositiveIntegerField(null=True, default=0)
     reduce_stock = models.PositiveIntegerField(null=True, default=0)     
 
@@ -107,14 +106,43 @@ class SalesDetail(models.Model):
         return f"Sale Details #{self.sales_detail_id}"
 
 
-class StockAdjustment(models.Model):
-    """Manuel adjustments to stock made in user's site"""
-    sku = models.ForeignKey(Product,on_delete=models.CASCADE)
-    product_name =models.CharField(max_length=200)
-    quantity = models.IntegerField()
-    reason = models.CharField()
-    date = models.DateTimeField(auto_now_add=True)
+class StockIn(models.Model):
+    """Track stock coming in"""
+    stockInID = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    sku = models.ForeignKey(Product, on_delete=models.PROTECT)
+    product_name = models.CharField(max_length=200)
+    unit_cost_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
+    unit_selling_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
+    stock = models.PositiveIntegerField(null=True, default=0)
+    shortage_threshold = models.IntegerField(null=False, default=1)
+    closest_expiry_date = models.DateField(null=True, default=None, blank=True)
+    expiring_soon_alert_date = models.DateField(null=True, blank=True, default=None)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.product_name
+    
+
+class StockOut(models.Model):
+    """Track stock moving out"""
+    stockOutID = models.BigAutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    sku = models.ForeignKey(Product, on_delete=models.PROTECT)
+    product_name = models.CharField(max_length=200)
+    stock = models.PositiveIntegerField(null=True, default=0)
+    REASON_CHOICES = (
+        ('Unwholesome', 'Unwholesome'),
+        ('Expired', 'Expired'),
+        ('Other', 'Other'),
+    )
+    reason = models.CharField(choices = REASON_CHOICES)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.product_name
+
+
 
 
 

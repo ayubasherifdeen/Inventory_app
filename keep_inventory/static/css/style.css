@@ -65,7 +65,7 @@ h1,h2,h3,h4,h5,h6{
 .nav-link.active:not(:hover) {
     font-weight: bold;
     background-color:#4B9CD3;
-    color: whitesmoke !important; /* Blue */
+    color: whitesmoke !important;
     padding:10px;
     border-radius: 5px;
     margin:0;
@@ -75,10 +75,95 @@ h1,h2,h3,h4,h5,h6{
     font-family: 'Courier New', monospace; 
 }
 
-.active {
-    color:white;
-    border:solid 1px black;
-    border-radius: 8px;
-    background-color: #4F7942;
 
-}
+.management-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 300px;
+        }
+
+        /* Dropdown animation */
+        .action-dropdown {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, margin-top 0.3s ease-out;
+            margin-top: 0;
+        }
+
+        .action-dropdown.show {
+            max-height: 450px;
+            margin-top: 1rem;
+            transition: max-height 0.3s ease-in, margin-top 0.3s ease-in;
+        }
+
+        /* Radio option styling */
+        .action-option {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .action-option:hover {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+
+        .action-option input[type="radio"] {
+            margin-right: 1rem;
+            cursor: pointer;
+        }
+
+        .action-option input[type="radio"]:checked + .option-content {
+            color: #007bff;
+            font-weight: 500;
+        }
+
+        .action-option.selected {
+            border-color: #007bff;
+            background: #e7f3ff;
+        }
+
+        .option-content {
+            flex: 1;
+        }
+
+        .option-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .option-description {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin: 0;
+        }
+
+        /* Button arrow rotation */
+        .btn-manage .arrow {
+            display: inline-block;
+            transition: transform 0.3s ease;
+            margin-left: 0.5rem;
+        }
+
+        .btn-manage.expanded .arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-buttons button {
+            flex: 1;
+        }
+
