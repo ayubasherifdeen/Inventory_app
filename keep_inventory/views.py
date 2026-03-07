@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
-from . models import Product, Sale, SalesDetail
+from . models import Product, Sale, SalesDetail, StockIn, StockOut
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
@@ -10,6 +10,8 @@ from django.db.models import Count, Sum
 from datetime import timedelta, date, datetime
 from dateutil.relativedelta import relativedelta
 from django.http import JsonResponse
+from .forms import StockMovementForm, StockInForm, StockOutForm
+
 
 # Create your views here.
 @login_required
@@ -63,6 +65,7 @@ def index(request):
 
 @login_required
 def search_sales_per_date(request):
+    """Search sales per date"""
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
 
@@ -100,13 +103,9 @@ def search_sales_per_date(request):
     return redirect('keep_inventory:index')
 
 
-
-
-
-
-
 @login_required
 def search_transaction_per_date(request):
+    """Search transactions per date"""
     start_date_str = request.GET.get('start_date_tr')
     end_date_str = request.GET.get('end_date_tr')
 
@@ -159,6 +158,7 @@ def search_transaction_per_date(request):
 
 @login_required
 def search_products(request):
+    """Search products"""
     query = request.GET.get('q', '')
     results = []
     cart = request.session.get('cart', [])
@@ -289,7 +289,7 @@ def confirm_sale(request):
             request.session['total_amount'] = 0    
 
     except Exception:
-        # If something breaks, rollback happens automatically
+        # If something breaks, rollback automatically
         return redirect("keep_inventory:sell")
 
     return redirect("keep_inventory:sell")
@@ -316,6 +316,7 @@ def check_expiring_today(request):
         ).values('product_name','closest_expiry_date' )
     )
 
+
 def check_expired(request):
     """Check for products whose expiring dates have elapsed"""
     today = date.today()
@@ -325,7 +326,6 @@ def check_expired(request):
         closest_expiry_date__lt = today
         ).values('product_name','closest_expiry_date' )
     )
-
 
 
 def sale_details_api(request, sale_id):
@@ -345,22 +345,72 @@ def sale_details_api(request, sale_id):
     })
 
 
+login_required
+def adjust_stock(request):
+    """
+    adjust stock
+    """
+    if request.method == 'POST':
+        stock_choice = request.POST.get('product_action')
+        
+        if stock_choice == 'stock_in':
+            return redirect('keep_inventory:stock_in')
+        elif stock_choice == 'stock_out':
+            return redirect('keep_inventory:stock_out')
+        else:
+            messages.error(request, 'Please select an action.')
+    
+    return render(request, 'keep_inventory/sell.html')
 
 
+@login_required
+def stock_in(request):
+    """
+    Add  products.
+    """
+    if request.method == 'POST':
+        stock_in_form = StockInForm(request.POST)
+        
+        if stock_in_form.is_valid():
+            stock_in_record=stock_in_form.save(commit=False)
+            stock_in_record.user = request.user
+            stock_in_record.save()
+            messages.success(request, 'Stock added successfully!')
+            return redirect('keep_inventory/stock_in.html')
+    else:
+        stock_in_form = StockInForm()
+    
+    return render(
+        request, 
+        'keep_inventory/stock_in.html', 
+        {'form': stock_in_form}
+    )
 
 
-
-
-
-
-
-
-
-
-
-
-   
-
-
-
-
+@login_required
+def stock_out(request):
+    """
+    Remove stock from products.
+    """
+    if request.method == 'POST':
+        stock_out_form = StockOutForm(request.POST)
+        
+        if stock_out_form.is_valid():
+            stock_out_record = stock_out_form.save(commit=False)
+            stock_out_record.user = request.user
+            product = stock_out_record.sku
+            stock_out_record.save()
+            messages.success(
+                request, 
+                f'{product.product_name} stock removed successfully!'
+            )
+            return redirect('keep_inventory/sell.html')
+    else:
+        
+        stock_out_form = StockOutForm()
+    
+    return render(
+        request, 
+        'keep_inventory/stock_out.html', 
+        {'form': stock_out_form}
+    )
