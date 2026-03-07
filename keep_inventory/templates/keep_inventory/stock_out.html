@@ -1,7 +1,11 @@
 {% extends "keep_inventory/base.html" %}
 
+{% block page_header %}
+<h2>Remove Product</h2>
+{% endblock page_header %}
+
 {% block content %}
-    <h4>Remove Product</h4>
+   
     <form method="post" action="{% url 'keep_inventory:stock_out' %}">
         {% csrf_token %}
         {{ form.as_p }}

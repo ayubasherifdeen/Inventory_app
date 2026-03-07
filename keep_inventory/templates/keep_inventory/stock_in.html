@@ -1,8 +1,12 @@
 {% extends "keep_inventory/base.html" %}
 
+{% block page_header %}
+<h2>Add Product</h2>
+{% endblock page_header %}
+
+
 {% block content %}
-    <h4>Add product</h4>
-    <form method="post" action="{% url 'keep_inventory:stock_in' %}">
+    <form method="post" action="{% url 'keep_inventory:stock_in' %}" class="form">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Save</button>
