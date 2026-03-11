@@ -375,7 +375,7 @@ def stock_in(request):
             stock_in_record.user = request.user
             stock_in_record.save()
             messages.success(request, 'Stock added successfully!')
-            return redirect('keep_inventory/stock_in.html')
+            return redirect('keep_inventory:stock_in')
     else:
         stock_in_form = StockInForm()
     
@@ -403,7 +403,7 @@ def stock_out(request):
                 request, 
                 f'{product.product_name} stock removed successfully!'
             )
-            return redirect('keep_inventory/sell.html')
+            return redirect('keep_inventory:stock_out')
     else:
         
         stock_out_form = StockOutForm()

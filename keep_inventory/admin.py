@@ -36,15 +36,15 @@ class SalesDetailAdmin(admin.ModelAdmin):
 
 @admin.register(StockIn)
 class StockInAdmin(admin.ModelAdmin):
-    list_display=['stockInID','user', 'sku', 'product_name', 'unit_cost_price', 'unit_selling_price', 'stock','date']
-    readonly_fields=['stockInID','sku','user','product_name','unit_cost_price', 'unit_selling_price', 'stock','shortage_threshold', 'closest_expiry_date', 'date']
+    list_display=['stock_in_ID','user', 'sku', 'product_name', 'unit_cost_price', 'unit_selling_price', 'stock','date']
+    readonly_fields=['stock_in_ID','sku','user','product_name','unit_cost_price', 'unit_selling_price', 'stock','shortage_threshold', 'closest_expiry_date', 'date']
     list_filter=['user', ('date', DateRangeFilter)]
 
 
 @admin.register(StockOut)
 class StockOutAdmin(admin.ModelAdmin):
-    list_display=['stockOutID', 'user', 'sku', 'product_name', 'stock', 'reason', 'date']
-    readonly_fields=['stockOutID', 'user', 'sku', 'product_name', 'stock', 'reason', 'date']
+    list_display=['stock_out_ID', 'user', 'sku', 'product_name', 'stock', 'reason', 'date']
+    readonly_fields=['stock_out_ID', 'user', 'sku', 'product_name', 'stock', 'reason', 'date']
     list_filter=['user', 'reason', ('date', DateRangeFilter)]
 
 

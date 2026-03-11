@@ -29,3 +29,6 @@ class StockOutForm(forms.ModelForm):
         model = StockOut
         fields = "__all__"
         exclude = ['user', 'date',]
+
+    def clean_input(self):
+        return
