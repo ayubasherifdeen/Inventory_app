@@ -10,7 +10,7 @@ from django.db.models import Count, Sum
 from datetime import timedelta, date, datetime
 from dateutil.relativedelta import relativedelta
 from django.http import JsonResponse
-from .forms import StockMovementForm, StockInForm, StockOutForm
+from .forms import StockInForm, StockOutForm
 
 
 # Create your views here.
@@ -345,23 +345,6 @@ def sale_details_api(request, sale_id):
     })
 
 
-login_required
-def adjust_stock(request):
-    """
-    adjust stock
-    """
-    if request.method == 'POST':
-            
-        if request.POST.get('stock_in'):
-            return redirect('keep_inventory:stock_in')
-        elif request.POST.get('stock_out'):
-            return redirect('keep_inventory:stock_out')
-        else:
-            messages.error(request, 'Please select an action.')
-    
-    return render(request, 'keep_inventory/sell.html')
-
-
 @login_required
 def stock_in(request):
     """
@@ -373,8 +356,9 @@ def stock_in(request):
         if stock_in_form.is_valid():
             stock_in_record=stock_in_form.save(commit=False)
             stock_in_record.user = request.user
+            product = stock_in_record.sku
             stock_in_record.save()
-            messages.success(request, 'Stock added successfully!')
+            messages.success(request, f'{product.product_name} added successfully!')
             return redirect('keep_inventory:stock_in')
     else:
         stock_in_form = StockInForm()

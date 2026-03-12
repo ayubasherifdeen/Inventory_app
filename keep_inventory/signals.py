@@ -14,13 +14,13 @@ def update_with_stock_in(sender, instance, created, **kwargs):
                 'unit_cost_price': instance.unit_cost_price,
                 'unit_selling_price': instance.unit_selling_price,
                 'shortage_threshold': instance.shortage_threshold,
-                # Handle total_stock: increment if exists, else set to instance.stock
+                #increase if already exists
                 'total_stock': Case(
                     When(Q(total_stock__isnull=False), then=F('total_stock') + instance.stock),
                     default=instance.stock,
                     output_field=models.PositiveIntegerField(),
                 ),
-                # Handle closest_expiry_date: take the earlier (min) date
+                #choose closer date
                 'closest_expiry_date': Case(
                     When(Q(closest_expiry_date__isnull=False) & Q(closest_expiry_date__lt=instance.closest_expiry_date),
                          then=F('closest_expiry_date')),

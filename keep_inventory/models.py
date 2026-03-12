@@ -126,7 +126,7 @@ class StockIn(models.Model):
     unit_selling_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
     stock = models.PositiveIntegerField(null=True, default=0)
     shortage_threshold = models.IntegerField(null=False, default=1)
-    closest_expiry_date = models.DateField(null=True, default=None, blank=True)
+    closest_expiry_date = models.DateField(null=True, blank=False)
     expiring_soon_alert_date = models.DateField(null=True, blank=True, default=None)
     date = models.DateTimeField(auto_now_add=True)
 
