@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     #My apps
-
     'users',
     'keep_inventory.apps.KeepInventoryConfig',
 
@@ -40,6 +39,10 @@ INSTALLED_APPS = [
     'bootstrap4',
     "phonenumber_field",
     'rangefilter',
+    'unfold',
+    'unfold.contrib.filters',
+    'unfold.contrib.import_export',
+    'unfold.contrib.forms',
 
     #Default django apps
     'django.contrib.admin',
@@ -65,7 +68,7 @@ ROOT_URLCONF = 'Inventory.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -146,3 +149,13 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'debonairsharif@gmail.com'
 EMAIL_HOST_PASSWORD = 'soqc yoxi numf aize'  #Gmail generated password
+
+#unfold setting
+UNFOLD = {
+    "SITE_TITLE": "StockTrack Administration",
+    "SITE_HEADER": "StockTrack Administration",
+    "DASHBOARD_CALLBACK": "keep_inventory.views.dashboard_callback",
+
+    
+}
+

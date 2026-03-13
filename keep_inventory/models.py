@@ -43,12 +43,19 @@ class Product(models.Model):
             return profit * self.total_stock
         return None
 
-    def __str__(self):
-        return self.product_name
-    
+   
     shortage_threshold = models.IntegerField(null=False, default=1)
     closest_expiry_date = models.DateField(null=True, default=None, blank=True)
     expiring_soon_alert_date = models.DateField(null=True, blank=True, default=None)
+
+    def save(self, *args, **kwargs):
+        self.sku = self.sku.upper()
+        self.product_name = self.product_name.title()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.sku}"
+    
     
 
 class Sale(models.Model):
@@ -57,6 +64,9 @@ class Sale(models.Model):
     sales_date = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=0)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Sale ID #{self.sales_id}"
     
 class SalesDetail(models.Model):
     """Details of a sales made"""
@@ -108,7 +118,7 @@ class SalesDetail(models.Model):
 
 class StockIn(models.Model):
     """Track stock coming in"""
-    stockInID = models.BigAutoField(primary_key=True)
+    stock_in_ID = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     sku = models.ForeignKey(Product, on_delete=models.PROTECT)
     product_name = models.CharField(max_length=200)
@@ -116,17 +126,17 @@ class StockIn(models.Model):
     unit_selling_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
     stock = models.PositiveIntegerField(null=True, default=0)
     shortage_threshold = models.IntegerField(null=False, default=1)
-    closest_expiry_date = models.DateField(null=True, default=None, blank=True)
+    closest_expiry_date = models.DateField(null=True, blank=False)
     expiring_soon_alert_date = models.DateField(null=True, blank=True, default=None)
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.product_name
+        return f"{self.sku}"
     
 
 class StockOut(models.Model):
     """Track stock moving out"""
-    stockOutID = models.BigAutoField(primary_key=True)
+    stock_out_ID = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     sku = models.ForeignKey(Product, on_delete=models.PROTECT)
     product_name = models.CharField(max_length=200)
@@ -140,7 +150,7 @@ class StockOut(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.product_name
+        return f"{self.sku}"
 
 
 

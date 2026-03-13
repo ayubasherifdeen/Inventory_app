@@ -54,6 +54,6 @@ urlpatterns = [
 
 ]
 
-admin.site.index_title = "The Shop"
+admin.site.index_title = "Dashboard"
 admin.site.site_header = "StockTrack Adminstration"
-admin.site.site_title = "StockTrack Adminstration"
+admin.site.site_title = "StockTrack"

@@ -1,4 +1,5 @@
 {% extends "keep_inventory/base.html" %}
+{% load bootstrap4 %}
 
 {% block page_header %}
 <h2>Add Product</h2>
@@ -6,9 +7,19 @@
 
 
 {% block content %}
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
     <form method="post" action="{% url 'keep_inventory:stock_in' %}" class="form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save</button>
+        {% bootstrap_form form %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">Save</button>
+        {% endbuttons %}
     </form>
 {% endblock content %}
