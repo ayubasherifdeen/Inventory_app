@@ -397,3 +397,13 @@ def stock_out(request):
         'keep_inventory/stock_out.html', 
         {'form': stock_out_form}
     )
+
+
+
+#Admin dashboard
+def dashboard_callback(request, context):
+    context.update({
+        "custom_variable": "value",
+    })
+
+    return context
