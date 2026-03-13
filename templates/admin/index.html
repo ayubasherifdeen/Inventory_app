@@ -15,5 +15,18 @@
 {% endblock %}
 
 {% block content %}
-    Start creating your own Tailwind components here
+<div class="date">
+    <p style="margin-top:20px;">{{ start_date }} - {{ end_date }}</p>
+    <form method="get" action="{% url  'keep_inventory:search_sales_per_date' %}">
+        <label for="start_date">
+            Start Date
+            <input type="date" id="start_date" name="start_date" required class="select-date">
+        </label>
+        <label for="end_date">
+            End Date
+            <input type="date" id="end_date" name="end_date" required class="select-date">
+        </label>
+        <button type="submit" name = "date" class="btn btn-info">Search</button>
+    </form>
+</div>
 {% endblock %}

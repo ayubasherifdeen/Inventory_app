@@ -1,16 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
-from . models import Product, Sale, SalesDetail, StockIn, StockOut
+from . models import Product, Sale, SalesDetail
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from django.contrib import messages
 from django.db.models import Count, Sum
 from datetime import timedelta, date, datetime
-from dateutil.relativedelta import relativedelta
 from django.http import JsonResponse
 from .forms import StockInForm, StockOutForm
+from .utils import *
 
 
 # Create your views here.
@@ -65,92 +65,53 @@ def index(request):
 
 @login_required
 def search_sales_per_date(request):
-    """Search sales per date"""
+    """Search sales per date and store aggregates in session"""
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
-
-    if not start_date_str or not end_date_str:
-        # Missing dates → redirect with no session overrides
+    
+    start_date, end_date = get_date(start_date_str, end_date_str)
+    
+    if not start_date:
         return redirect('keep_inventory:index')
-
-    try:
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
-        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
-
-        # Adjust end date for range filtering
-        end_date_next = end_date + timedelta(days=1)
-
-        # Query
-        sales_count = Sale.objects.filter(
-            sales_date__range=(start_date, end_date_next),
-            owner=request.user
-        ).count()
-
-        total_sales = Sale.objects.filter(
-            sales_date__range=(start_date, end_date_next),
-            owner=request.user
-            ).aggregate(total=Sum('total_amount'))['total']
-
-        # Store results in session
-        request.session['start_date'] = str(start_date)
-        request.session['end_date'] = str(end_date)
-        request.session['sales_count'] = sales_count
-        request.session['total_sales'] = total_sales
-
-    except ValueError:
-        pass
-
+    
+    sales = get_sales(request.user, start_date, end_date)
+    
+    sales_count = sales.count()
+    total_sales = sales.aggregate(total=Sum('total_amount'))['total'] or 0
+    
+    # Store in session
+    request.session['start_date'] = str(start_date)
+    request.session['end_date'] = str(end_date)
+    request.session['sales_count'] = sales_count
+    request.session['total_sales'] = str(total_sales)
+    
     return redirect('keep_inventory:index')
 
 
 @login_required
 def search_transaction_per_date(request):
-    """Search transactions per date"""
+    """Search transactions per date and display them"""
     start_date_str = request.GET.get('start_date_tr')
     end_date_str = request.GET.get('end_date_tr')
-
-    # Validate input
-    transactions = None
-    if not start_date_str and not end_date_str:
-         # Get today's date
-        today = date.today()
-        tomorrow = today + timedelta(days=1)
-
-         # Convert strings to date objects
-        start_date = today
-        end_date = tomorrow
-
-        # query and count number of sales
-        transactions = Sale.objects.filter(
-            sales_date__range=(start_date, end_date),
-            owner=request.user
-        ).order_by('-sales_date')
-
-    if start_date_str and end_date_str:
-       
-        #If date is provided
-        try:
-            # Convert strings to date objects
-            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
-            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
-
-            # query and count number of sales
-            transactions = Sale.objects.filter(
-                sales_date__range=(start_date, end_date),
-                owner=request.user
-            ).order_by('-sales_date')
-  
-        except ValueError:
-            transactions = None
-
     
-
-    return render(request, "keep_inventory/transactions.html", context = {
-
-        'start_date':start_date,
-        'end_date':end_date,
-        'transactions':transactions,
-        'auto_load':True
+    # Parse dates (use today if empty)
+    start_date, end_date = get_date(
+        start_date_str, 
+        end_date_str, 
+        use_today_if_empty=True
+    )
+    
+    # Get transactions
+    if start_date:
+        transactions = get_sales(request.user, start_date, end_date)
+    else:
+        transactions = None
+    
+    return render(request, "keep_inventory/transactions.html", {
+        'start_date': start_date,
+        'end_date': end_date,
+        'transactions': transactions,
+        'auto_load': True
     })
 
     
@@ -295,37 +256,6 @@ def confirm_sale(request):
     return redirect("keep_inventory:sell")
 
 
-def check_expiring_soon(request):
-    """Check for products expiring within the next month"""
-    today = date.today()
-    three_months_from_now = today + relativedelta(months=3)
-    return list(
-        Product.objects.filter(
-        closest_expiry_date__lt = three_months_from_now,
-        closest_expiry_date__gte=today 
-        ).values('product_name','closest_expiry_date' )
-    )
-
-def check_expiring_today(request):
-    """Check for products expiring today"""
-    today = date.today()
-
-    return list(
-        Product.objects.filter(
-        closest_expiry_date = today
-        ).values('product_name','closest_expiry_date' )
-    )
-
-
-def check_expired(request):
-    """Check for products whose expiring dates have elapsed"""
-    today = date.today()
-
-    return list(
-        Product.objects.filter(
-        closest_expiry_date__lt = today
-        ).values('product_name','closest_expiry_date' )
-    )
 
 
 def sale_details_api(request, sale_id):
@@ -402,6 +332,8 @@ def stock_out(request):
 
 #Admin dashboard
 def dashboard_callback(request, context):
+
+        
     context.update({
         "custom_variable": "value",
     })
